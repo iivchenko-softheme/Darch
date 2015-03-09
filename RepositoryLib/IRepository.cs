@@ -35,7 +35,7 @@ namespace RepositoryLib
         /// <summary>
         /// Adds new item to the storage.
         /// </summary>
-        /// <param name="item">New item.</param>
+        /// <param name="item">New item to store in the repository.</param>
         /// <returns>Unique identifier for the new item.</returns>
         TId Add(TItem item);
 
