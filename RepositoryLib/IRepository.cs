@@ -40,21 +40,10 @@ namespace RepositoryLib
         TId Add(TItem item);
 
         /// <summary>
-        /// Deletes item from the storage.
-        /// </summary>
-        /// <param name="item">Item to be deleted.</param>
-        void Delete(TItem item);
-
-        /// <summary>
         /// Deletes item from the storage by its identifier.
         /// </summary>
         /// <param name="id">Unique identifier of the item.</param>
         void Delete(TId id);
-
-        /// <summary>
-        /// Replace old item with the new one without changing its identifier.
-        /// </summary>
-        void Update(TItem oldItem, TItem newItem);
 
         /// <summary>
         /// Find item by identifier and replace it with new item.

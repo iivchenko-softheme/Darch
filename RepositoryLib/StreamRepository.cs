@@ -24,17 +24,7 @@ namespace RepositoryLib
             throw new System.NotImplementedException();
         }
 
-        public void Delete(TItem item)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public void Delete(TId id)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Update(TItem oldItem, TItem newItem)
         {
             throw new System.NotImplementedException();
         }
