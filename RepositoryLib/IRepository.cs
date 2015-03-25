@@ -23,7 +23,7 @@ namespace RepositoryLib
         /// <summary>
         /// Gets enumerator to enumerate each item of the storage.
         /// </summary>
-        IEnumerable<TItem> All { get; }
+        IEnumerable<RepositoryItem<TId, TItem>> All { get; }
 
         /// <summary>
         /// Returns an item by its identifier.

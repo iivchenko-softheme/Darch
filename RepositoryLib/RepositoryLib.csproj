@@ -46,7 +46,11 @@
   <ItemGroup>
     <Compile Include="IRepository.cs" />
     <Compile Include="IStreamMapper.cs" />
+    <Compile Include="ItemCorruptedException.cs" />
+    <Compile Include="MissingItemException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RepositoryException.cs" />
+    <Compile Include="RepositoryItem.cs" />
     <Compile Include="StreamRepository.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
