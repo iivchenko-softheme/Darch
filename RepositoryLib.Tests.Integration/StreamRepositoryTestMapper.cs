@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace RepositoryLib.Tests.Integration
 {
-    public class TestMapper : IStreamMapper<StreamRepositoryTestItem>
+    public class StreamRepositoryTestMapper : IStreamMapper<StreamRepositoryTestItem>
     {
         public byte[] Convert(StreamRepositoryTestItem item)
         {

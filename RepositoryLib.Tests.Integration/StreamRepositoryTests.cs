@@ -33,7 +33,7 @@ namespace RepositoryLib.Tests.Integration
         {
             _repository = new StreamRepository<StreamRepositoryTestItem>(
                 new MemoryStream(), 
-                new TestMapper(),
+                new StreamRepositoryTestMapper(),
                 StreamRepositoryTestItem.ItemSize);
         }
 
@@ -42,7 +42,7 @@ namespace RepositoryLib.Tests.Integration
         [Test]
         public void Test()
         {
-            var mapper = new TestMapper();
+            var mapper = new StreamRepositoryTestMapper();
             var item = new StreamRepositoryTestItem
             {
                 TestValue1 = int.MinValue,
