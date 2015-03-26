@@ -4,7 +4,6 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-// TODO: Override equals for tests
 namespace RepositoryLib
 {
     public sealed class RepositoryItem<TId, TItem>

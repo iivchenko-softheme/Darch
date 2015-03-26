@@ -38,26 +38,7 @@ namespace RepositoryLib.Tests.Integration
         }
 
         #region Functionality tests
-
-        [Test]
-        public void Test()
-        {
-            var mapper = new StreamRepositoryTestMapper();
-            var item = new StreamRepositoryTestItem
-            {
-                TestValue1 = int.MinValue,
-                TestValue2 = long.MaxValue,
-                TestString = "Helloworld"
-            };
-
-            var buffer = mapper.Convert(item);
-            var itemNew = mapper.Convert(buffer);
-
-            Console.WriteLine(item.ToString());
-            Console.Write("   ");
-            Console.WriteLine(itemNew.ToString());
-        }
-
+      
         [Test]
         [Description("Add specific amount of items. It must be equals to the Count in the repository.")]
         public void AddCount_Test()
@@ -75,7 +56,7 @@ namespace RepositoryLib.Tests.Integration
         [Description("Add soume items to the repository and then delete some. Repository count should be correct.")]
         public void AddDeleteCount_Test()
         {
-            const int ItemsCountAdd = 10000;
+            const int ItemsCountAdd = 1000;
             const int ItemsCountDelete = 251;
 
             var ids = new List<uint>();
@@ -86,7 +67,7 @@ namespace RepositoryLib.Tests.Integration
                 ids.Add(_repository.Add(CreateItem()));
             }
 
-            // Delete some from the repository
+            // Delete some items from the repository
             // And also delete that items from ids list to prevent deletion of the same item twice.
             for (var i = 0; i < ItemsCountDelete; i++)
             {
@@ -97,6 +78,71 @@ namespace RepositoryLib.Tests.Integration
             }
 
             Assert.AreEqual(ItemsCountAdd - ItemsCountDelete, _repository.Count);
+        }
+
+        [Test]
+        [Description("Add specific amount of items. Enumerate All repository items and check that they are equals.")]
+        public void AddAll_Test()
+        {
+            const int ItemsCountAdd = 1000;
+
+            var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
+
+            // Fill the repository with items
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+                
+                var id = _repository.Add(item);
+                items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+            }
+
+            // Check if items are same in the repo and in the list
+            foreach (var item in _repository.All)
+            {
+                var expected = items.Single(x => x.Id == item.Id).Item;
+                var actual = item.Item;
+
+                Assert.AreEqual(expected, actual);
+            }
+        }
+
+        [Test]
+        [Description("Add specific amount of items. Delete some of them. Enumerate All repository items and check that they are equals.")]
+        public void AddDeleteAll_Test()
+        {
+            const int ItemsCountAdd = 1000;
+            const int ItemsCountDelete = 251;
+
+            var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
+
+            // Fill the repository with items
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+
+                var id = _repository.Add(item);
+                items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+            }
+
+            // Delete some items from the repository
+            // And also delete that items from ids list to prevent deletion of the same item twice.
+            for (var i = 0; i < ItemsCountDelete; i++)
+            {
+                var item = items[_random.Next(items.Count - 1)];
+                items.Remove(item);
+
+                _repository.Delete(item.Id);
+            }
+
+            // Check if items are same in the repo and in the list
+            foreach (var item in _repository.All)
+            {
+                var expected = items.Single(x => x.Id == item.Id).Item;
+                var actual = item.Item;
+
+                Assert.AreEqual(expected, actual);
+            }
         }
 
         // count test

@@ -13,7 +13,7 @@ namespace RepositoryLib.Tests.Integration
     {
         public const int ItemSize = sizeof(int) + sizeof(long) + TestStringSize;
         public const int TestStringSize = 10;
-
+        
         private string _testString;
 
         public int TestValue1 { get; set; }
@@ -45,9 +45,68 @@ namespace RepositoryLib.Tests.Integration
             }
         }
 
+        public static bool operator ==(StreamRepositoryTestItem left, StreamRepositoryTestItem right)
+        {
+            if (object.ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (((object)left == null) || ((object)right == null))
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(StreamRepositoryTestItem left, StreamRepositoryTestItem right)
+        {
+            return !(left == right);
+        }
+
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}; {1}; {2}", TestValue1, TestValue2, TestString);
+            return string.Format(CultureInfo.InvariantCulture, "{0}; {1}; {2}", TestValue1, TestValue2, _testString);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
+
+            return Equals((StreamRepositoryTestItem)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = _testString != null ? _testString.GetHashCode() : 0;
+                hashCode = (hashCode * 397) ^ TestValue1;
+                hashCode = (hashCode * 397) ^ TestValue2.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        protected bool Equals(StreamRepositoryTestItem obj)
+        {
+            return 
+                string.Equals(_testString, obj._testString) && 
+                TestValue1 == obj.TestValue1 &&
+                TestValue2 == obj.TestValue2;
         }
     }
 }

@@ -65,7 +65,7 @@ namespace RepositoryLib
             get
             {
                 // TODO: Check speed for the algorithm
-                return _cache.Value.Select(idIndex => new RepositoryItem<uint, TItem>(idIndex.Key, ReadItem(idIndex.Value)));
+                return _cache.Value.Keys.Select(id => new RepositoryItem<uint, TItem>(id, ReadItem(GetItemIndex(id))));
             }
         }
 
