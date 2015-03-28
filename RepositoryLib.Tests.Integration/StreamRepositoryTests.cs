@@ -6,6 +6,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -15,7 +17,9 @@ namespace RepositoryLib.Tests.Integration
     [TestFixture]
     public class StreamRepositoryTests
     {
-        private StreamRepository<StreamRepositoryTestItem> _repository;
+        private const int ItemsCountAdd = 1000;
+        private const int ItemsCountDelete = 251;
+        
         private Random _random;
 
         [TestFixtureSetUp]
@@ -28,43 +32,34 @@ namespace RepositoryLib.Tests.Integration
             _random = new Random(seed);
         }
 
-        [SetUp]
-        public void Setup()
-        {
-            _repository = new StreamRepository<StreamRepositoryTestItem>(
-                new MemoryStream(), 
-                new StreamRepositoryTestMapper(),
-                StreamRepositoryTestItem.ItemSize);
-        }
-
         #region Functionality tests
       
         [Test]
         [Description("Add specific amount of items. It must be equals to the Count in the repository.")]
         public void AddCount_Test()
         {
-            const int ItemsCount = 1000;
-            for (var i = 0; i < ItemsCount; i++)
+            var repository = CreateRepository();
+
+            for (var i = 0; i < ItemsCountAdd; i++)
             {
-                _repository.Add(CreateItem());
+                repository.Add(CreateItem());
             }
 
-            Assert.AreEqual(ItemsCount, _repository.Count);
+            Assert.AreEqual(ItemsCountAdd, repository.Count);
         }
 
         [Test]
         [Description("Add soume items to the repository and then delete some. Repository count should be correct.")]
         public void AddDeleteCount_Test()
         {
-            const int ItemsCountAdd = 1000;
-            const int ItemsCountDelete = 251;
+            var repository = CreateRepository();
 
             var ids = new List<uint>();
 
             // Fill the repository with items
             for (var i = 0; i < ItemsCountAdd; i++)
             {
-                ids.Add(_repository.Add(CreateItem()));
+                ids.Add(repository.Add(CreateItem()));
             }
 
             // Delete some items from the repository
@@ -74,18 +69,17 @@ namespace RepositoryLib.Tests.Integration
                 var id  = ids[_random.Next(ids.Count - 1)];
                 ids.Remove(id);
 
-                _repository.Delete(id);
+                repository.Delete(id);
             }
 
-            Assert.AreEqual(ItemsCountAdd - ItemsCountDelete, _repository.Count);
+            Assert.AreEqual(ItemsCountAdd - ItemsCountDelete, repository.Count);
         }
 
         [Test]
         [Description("Add specific amount of items. Enumerate All repository items and check that they are equals.")]
         public void AddAll_Test()
         {
-            const int ItemsCountAdd = 1000;
-
+            var repository = CreateRepository();
             var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
 
             // Fill the repository with items
@@ -93,12 +87,12 @@ namespace RepositoryLib.Tests.Integration
             {
                 var item = CreateItem();
                 
-                var id = _repository.Add(item);
+                var id = repository.Add(item);
                 items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
             }
 
             // Check if items are same in the repo and in the list
-            foreach (var item in _repository.All)
+            foreach (var item in repository.All)
             {
                 var expected = items.Single(x => x.Id == item.Id).Item;
                 var actual = item.Item;
@@ -111,9 +105,7 @@ namespace RepositoryLib.Tests.Integration
         [Description("Add specific amount of items. Delete some of them. Enumerate All repository items and check that they are equals.")]
         public void AddDeleteAll_Test()
         {
-            const int ItemsCountAdd = 1000;
-            const int ItemsCountDelete = 251;
-
+            var repository = CreateRepository();
             var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
 
             // Fill the repository with items
@@ -121,7 +113,7 @@ namespace RepositoryLib.Tests.Integration
             {
                 var item = CreateItem();
 
-                var id = _repository.Add(item);
+                var id = repository.Add(item);
                 items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
             }
 
@@ -132,11 +124,11 @@ namespace RepositoryLib.Tests.Integration
                 var item = items[_random.Next(items.Count - 1)];
                 items.Remove(item);
 
-                _repository.Delete(item.Id);
+                repository.Delete(item.Id);
             }
 
             // Check if items are same in the repo and in the list
-            foreach (var item in _repository.All)
+            foreach (var item in repository.All)
             {
                 var expected = items.Single(x => x.Id == item.Id).Item;
                 var actual = item.Item;
@@ -145,18 +137,315 @@ namespace RepositoryLib.Tests.Integration
             }
         }
 
-        // count test
-        // add get by id test
-        // add delete test
+        [Test]
+        [Description("Add specific amount of items and get them by id and check that they are equals.")]
+        public void AddGetById_Test()
+        {
+            var repository = CreateRepository();
+            var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
+
+            // Fill the repository with items
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+
+                var id = repository.Add(item);
+                items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+            }
+
+            // Check if items are same in the repo and in the list
+            foreach (var expected in items)
+            {
+                var actual = repository.GetById(expected.Id);
+
+                Assert.AreEqual(expected.Item, actual);
+            }
+        }
+
+        [Test]
+        [Description("Add specific amount of items. Delete some of them. Get items by id and check that they are equals.")]
+        public void AddDeleteGetById_Test()
+        {
+            var repository = CreateRepository();
+            var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
+
+            // Fill the repository with items
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+
+                var id = repository.Add(item);
+                items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+            }
+
+            // Delete some items from the repository
+            // And also delete that items from ids list to prevent deletion of the same item twice.
+            for (var i = 0; i < ItemsCountDelete; i++)
+            {
+                var item = items[_random.Next(items.Count - 1)];
+                items.Remove(item);
+
+                repository.Delete(item.Id);
+            }
+
+            // Check if items are same in the repo and in the list
+            foreach (var expected in items)
+            {
+                var actual = repository.GetById(expected.Id);
+
+                Assert.AreEqual(expected.Item, actual);
+            }
+        }
+
+        [Test]
+        [Description("Add some items. Check them added. Update some of that items. Check they updated correctly")]
+        public void AddUpdate_Test()
+        {
+            var repository = CreateRepository();
+            var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
+            var updatedItems = new List<RepositoryItem<uint, StreamRepositoryTestItem>>(); 
+
+            // Fill the repository with items
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+
+                var id = repository.Add(item);
+                items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+            }
+
+            // Check if items are same in the repo and in the list
+            foreach (var expected in items)
+            {
+                var actual = repository.GetById(expected.Id);
+
+                Assert.AreEqual(expected.Item, actual);
+            }
+
+            // Update all items in the repository
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+                var id = items[i].Id;
+                 updatedItems.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+                
+                repository.Update(id, item);
+            }
+
+            // Check if items updated correctly
+            foreach (var expected in updatedItems)
+            {
+                var actual = repository.GetById(expected.Id);
+
+                Assert.AreEqual(expected.Item, actual);
+            }
+
+            Assert.AreEqual(ItemsCountAdd, repository.Count);
+        }
+
+        [Test]
+        [Description("Add some items. Get by id not existing one. Should throw exception.")]
+        public void GetById_NotExistingItem_Throws()
+        {
+            var repository = CreateRepository();
+            var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
+
+            // Fill the repository with items
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+
+                var id = repository.Add(item);
+                items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+            }
+
+            var notExistingId = items.Max(x => x.Id) + 1;
+
+            Assert.Throws<MissingItemException>(() => repository.GetById(notExistingId));
+        }
+
+        [Test]
+        [Description("Add some items. Delete not existing one. Should throw exception.")]
+        public void Delete_NotExistingItem_Throws()
+        {
+            var repository = CreateRepository();
+            var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
+
+            // Fill the repository with items
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+
+                var id = repository.Add(item);
+                items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+            }
+
+            var idToDelete = items[_random.Next(items.Count - 1)].Id;
+            repository.Delete(idToDelete);
+
+            Assert.Throws<MissingItemException>(() => repository.Delete(idToDelete));
+        }
+
+        [Test]
+        [Description("Delete the only item from the repository. Should work.")]
+        public void Delete_TheOnlyItem_Test()
+        {
+            var repository = CreateRepository();
+            var item = CreateItem();
+            var id = repository.Add(item);
+
+            repository.Delete(id);
+
+            Assert.AreEqual(0, repository.Count);
+        }
+
+        [Test]
+        [Description("Create and fill a repo. Create a new on based on the same stream to preload ids. Sure that all items not corrupted.")]
+        public void PreloadAll_Test()
+        {
+            var stream = new MemoryStream();
+            var repository = CreateRepository(stream);
+            var items = new List<RepositoryItem<uint, StreamRepositoryTestItem>>();
+
+            // Fill the repository with items
+            for (var i = 0; i < ItemsCountAdd; i++)
+            {
+                var item = CreateItem();
+
+                var id = repository.Add(item);
+                items.Add(new RepositoryItem<uint, StreamRepositoryTestItem>(id, item));
+            }
+
+            repository = CreateRepository(stream); // To initiate preload algo
+
+            // Check if items are same in the repo and in the list
+            foreach (var expected in items)
+            {
+                var actual = repository.GetById(expected.Id);
+
+                Assert.AreEqual(expected.Item, actual);
+            }
+        }
+
         // delete not existing item
-        // add get by id and All test
-        // add get by id update and get by id
         #endregion
 
         #region Performance tests
+
+        [TestCase(1)]
+        [TestCase(10)]
+        [TestCase(100)]
+        [TestCase(1000)]
+        [TestCase(10000)]
+        [TestCase(20000)]
+        [TestCase(30000)]
+        [TestCase(40000)]
+        [TestCase(50000)]
+        [TestCase(60000)]
+        [TestCase(100000)]
+        [Description("Just add so many items as it possible and calculate the speed.")]
+        public void PerformanceTest_Add(int count)
+        {
+            var repository = CreateRepository();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            for (var i = 0; i < count; i++)
+            {
+                repository.Add(CreateItem());
+            }
+
+            stopwatch.Stop();
+
+            Console.WriteLine("Add of {0} elements took {1}.", count, stopwatch.Elapsed);
+        }
+
+        [TestCase(1)]
+        [TestCase(10)]
+        [TestCase(100)]
+        [TestCase(1000)]
+        [TestCase(10000)]
+        [TestCase(20000)]
+        [TestCase(30000)]
+        [TestCase(40000)]
+        [TestCase(50000)]
+        [TestCase(60000)]
+        [TestCase(100000)]
+        [Description("Just add so many items and calculate enumeration speed for all items.")]
+        public void PerformanceTest_All(int count)
+        {
+            var repository = CreateRepository();
+            var stopwatch = new Stopwatch();
+
+            for (var i = 0; i < count; i++)
+            {
+                repository.Add(CreateItem());
+            }
+
+            stopwatch.Start();
+
+            foreach (var item in repository.All)
+            {
+                item.Id.ToString(CultureInfo.InvariantCulture);
+            }
+
+            stopwatch.Stop();
+
+            Console.WriteLine("Enumeration of all ({0}) elements took {1}.", count, stopwatch.Elapsed);
+        }
+
+        [TestCase(100000)]
+        [TestCase(60000)]
+        [TestCase(50000)]
+        [TestCase(40000)]
+        [TestCase(30000)]        
+        [TestCase(20000)]
+        [TestCase(10000)]
+        [TestCase(1000)]
+        [TestCase(100)]
+        [TestCase(10)]
+        [TestCase(1)]
+        [Description("Just add so many items and delete them all and calculate deletion speed for all items.")]
+        public void PerformanceTest_Delete(int count)
+        {
+            var repository = CreateRepository();
+            var ids = new List<uint>();
+            var stopwatch = new Stopwatch();
+
+            for (var i = 0; i < count; i++)
+            {
+                ids.Add(repository.Add(CreateItem()));
+            }
+
+            stopwatch.Start();
+
+            foreach (var id in ids)
+            {
+                repository.Delete(id);
+            }
+
+            stopwatch.Stop();
+
+            Console.WriteLine("Deletion of all ({0}) elements took {1}.", count, stopwatch.Elapsed);
+        }
+
         #endregion
 
         #region Help methods
+
+        private static StreamRepository<StreamRepositoryTestItem> CreateRepository()
+        {
+            return CreateRepository(new MemoryStream());
+        }
+
+        private static StreamRepository<StreamRepositoryTestItem> CreateRepository(Stream stream)
+        {
+            return new StreamRepository<StreamRepositoryTestItem>(
+                stream,
+                new StreamRepositoryTestMapper(),
+                StreamRepositoryTestItem.ItemSize);
+        }
 
         private StreamRepositoryTestItem CreateItem()
         {

@@ -13,9 +13,6 @@ using System.Linq;
 namespace RepositoryLib
 {
     // TODO: Create documentation
-    // TODO: Implement integratioon tests
-    // TODO: Implement performance tests
-    // TODO: Check algorithms
     public sealed class StreamRepository<TItem> : IRepository<TItem, uint>
     {
         private const int IdSize = sizeof(int);
@@ -38,7 +35,6 @@ namespace RepositoryLib
 
             _cache = new Lazy<IDictionary<uint, long>>(() =>
                                                       {
-                                                          // TODO: Implement performance tests to check load speed on big repositories.
                                                           var cache = new Dictionary<uint, long>();
                                                           long index = 0;
 
@@ -64,7 +60,6 @@ namespace RepositoryLib
         {
             get
             {
-                // TODO: Check speed for the algorithm
                 return _cache.Value.Keys.Select(id => new RepositoryItem<uint, TItem>(id, ReadItem(GetItemIndex(id))));
             }
         }
