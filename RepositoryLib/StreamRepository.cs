@@ -12,7 +12,10 @@ using System.Linq;
 
 namespace RepositoryLib
 {
-    // TODO: Create documentation
+    /// <summary>
+    /// The repository based on .net Stream. The stream is a storage used by the Repository.
+    /// </summary>
+    /// <typeparam name="TItem">Type that should be stored in the storage.</typeparam>
     public sealed class StreamRepository<TItem> : IRepository<TItem, uint>
     {
         private const int IdSize = sizeof(int);
@@ -24,6 +27,12 @@ namespace RepositoryLib
         // contains pair of item ID and item INDEX in the repository
         private readonly Lazy<IDictionary<uint, long>> _cache;
         
+        /// <summary>
+        /// Initializes a new instance of the StreamRepository class.
+        /// </summary>
+        /// <param name="stream">A stream which will be used as a storage for items.</param>
+        /// <param name="streamMapper">Provides conversation algorithms from <see cref="TItem"/> to a bytes and from bytes to a <see cref="TItem"/> to write and read <see cref="TItem"/> from <param name="stream"/>.</param>
+        /// <param name="itemSize">Size of each <see cref="TItem"/> in bytes.</param>
         public StreamRepository(
             Stream stream,
             IStreamMapper<TItem> streamMapper,

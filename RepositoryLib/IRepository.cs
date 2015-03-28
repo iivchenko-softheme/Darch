@@ -11,7 +11,7 @@ namespace RepositoryLib
     /// <summary>
     /// Represents generic mechanism to manipulate with abstract storage.
     /// </summary>
-    /// <typeparam name="TItem">Type that should be stored in storage.</typeparam>
+    /// <typeparam name="TItem">Type that should be stored in the storage.</typeparam>
     /// <typeparam name="TId">Type that represents unique identifier for each item in storage.</typeparam>
     public interface IRepository<TItem, TId>
     {

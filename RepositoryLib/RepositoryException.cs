@@ -10,7 +10,7 @@ using System.Runtime.Serialization;
 namespace RepositoryLib
 {
     /// <summary>
-    ///  Base for all Repository exceptions.
+    /// Base for all Repository exceptions.
     /// </summary>
     [Serializable]
     public abstract class RepositoryException : Exception

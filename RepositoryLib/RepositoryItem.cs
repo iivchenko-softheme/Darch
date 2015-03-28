@@ -6,6 +6,11 @@
 
 namespace RepositoryLib
 {
+    /// <summary>
+    /// Holder for <see cref="TItem"/> data and its <see cref="TId"/>.
+    /// </summary>
+    /// <typeparam name="TId">Type that represent <see cref="TItem"/> unique identifier.</typeparam>
+    /// <typeparam name="TItem">Type that should be stored in the storage.</typeparam>
     public sealed class RepositoryItem<TId, TItem>
     {
         public RepositoryItem(TId id, TItem item)
