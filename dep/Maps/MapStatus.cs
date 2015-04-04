@@ -4,13 +4,18 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-namespace Deduplication
+namespace Deduplication.Maps
 {
     /// <summary>
-    /// Provides functionality to create data storage.
+    /// Set of data handling statuses.
     /// </summary>
-    public interface IDataStorageFactory
+    public enum MapStatus
     {
-        RepositoryLib.IRepository<byte[], ulong> Create();
+        Pending,
+        InProgress,
+        Paused,
+        Failed,
+        Canceled,
+        Succeeded
     }
 }

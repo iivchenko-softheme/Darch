@@ -6,7 +6,7 @@
 
 using System;
 
-namespace Deduplication
+namespace Deduplication.Maps
 {
     /// <summary>
     /// Provides data for the event that is raised when data handling status changed.

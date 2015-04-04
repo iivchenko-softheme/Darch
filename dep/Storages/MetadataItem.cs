@@ -4,7 +4,7 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-namespace Deduplication
+namespace Deduplication.Storages
 {
     /// <summary>
     /// Contains metadata of a data block.

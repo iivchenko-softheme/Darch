@@ -6,7 +6,7 @@
 
 using System;
 
-namespace Deduplication
+namespace Deduplication.Maps
 {
     /// <summary>
     /// Provides functionality to monitor data handling process 
@@ -14,7 +14,7 @@ namespace Deduplication
     /// or reading data from the repository
     /// or deleting data form the repository.
     /// </summary>
-    public interface IMapProcessor
+    public interface IMapProcessor : IDisposable
     {
         /// <summary>
         /// Raises when <see cref="IMapProcessor"/> <see cref="Status"/> has been changed.
@@ -29,7 +29,7 @@ namespace Deduplication
         /// <summary>
         /// Gets the identifier of the map that logically combines piece of data.
         /// </summary>
-        uint Id { get; }
+        ulong Id { get; }
         
         /// <summary>
         /// Gets the data handling status.
