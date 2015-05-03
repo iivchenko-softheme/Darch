@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Deduplication.Utility;
 using RepositoryLib;
 
 namespace Deduplication.Storages
@@ -27,14 +28,14 @@ namespace Deduplication.Storages
             IHash hash,
             IRepository<MapRecord, ulong> mapRepository,
             IRepository<MetadataItem, ulong> metadataRepository,
-            IRepository<byte[], ulong> dataRepository) 
+            IRepository<byte[], ulong> dataRepository)
         {
             _hash = hash;
             _mapRepository = mapRepository;
             _metadataRepository = metadataRepository;
             _dataRepository = dataRepository;
 
-            _metadataCache = new Lazy<IDictionary<byte[], ulong>>(() => _metadataRepository.All.ToDictionary(key => key.Item.Checksum, value => value.Id));
+            _metadataCache = new Lazy<IDictionary<byte[], ulong>>(() => _metadataRepository.All.ToDictionary(key => key.Item.Checksum, value => value.Id, new ByteArrayEquityComparer()));
             _lock = new object();
 
             _disposed = false;

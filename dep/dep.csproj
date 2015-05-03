@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DeduplicationException.cs" />
+    <Compile Include="Utility\ByteArrayEquityComparer.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="Maps\BaseProcessor.cs" />
     <Compile Include="Maps\DeleteProcesser.cs" />
