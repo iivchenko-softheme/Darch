@@ -52,12 +52,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataStreamMapper.cs" />
-    <Compile Include="MapStreamMapper.cs" />
-    <Compile Include="MetadataStreamMapper.cs" />
     <Compile Include="ProgressMonitor.cs" />
     <Compile Include="RepositoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repository\DataStreamMapper.cs" />
+    <Compile Include="Repository\ManagedRepository.cs" />
+    <Compile Include="Repository\MapStreamMapper.cs" />
+    <Compile Include="Repository\MetadataStreamMapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dep\dep.csproj">

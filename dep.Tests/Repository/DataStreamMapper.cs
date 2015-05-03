@@ -7,7 +7,7 @@
 using System;
 using RepositoryLib;
 
-namespace Deduplication.Tests
+namespace Deduplication.Tests.Repository
 {
     public class DataStreamMapper : IStreamMapper<byte[]>
     {

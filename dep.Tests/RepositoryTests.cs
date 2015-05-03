@@ -6,10 +6,8 @@
 
 using System;
 using System.IO;
-using Deduplication.Maps;
-using Deduplication.Storages;
+using Deduplication.Tests.Repository;
 using NUnit.Framework;
-using RepositoryLib;
 
 namespace Deduplication.Tests
 {
@@ -40,7 +38,7 @@ namespace Deduplication.Tests
             var sourceStream = GenerageData();
             var targetStream = new MemoryStream();
 
-            using (var repo = CreateRepository(BlockSize, ChecksumSize))
+            using (var repo = new ManagedRepository(BlockSize, ChecksumSize))
             {
                 using (var writeMap = repo.Write(sourceStream))
                 {
@@ -72,28 +70,6 @@ namespace Deduplication.Tests
             }
 
             Assert.AreEqual(sourceStream, targetStream);
-        }
-
-        private static IRepository CreateRepository(int blockSize, int checksumSize)
-        {
-            var hash = new MD5Hash();
-
-            var mapStream = new MemoryStream();
-            var mapStreamMapper = new MapStreamMapper();
-            var mapRepository = new StreamRepository<MapRecord>(mapStream, mapStreamMapper, MapStreamMapper.BufferSize);
-
-            var metadataStream = new MemoryStream();
-            var metadataStreamMapper = new MetadataStreamMapper(checksumSize);
-            var metadataRepository = new StreamRepository<MetadataItem>(metadataStream, metadataStreamMapper, metadataStreamMapper.BufferSize);
-
-            var dataStream = new MemoryStream();
-            var dataStreamMapper = new DataStreamMapper(blockSize);
-            var dataRepository = new StreamRepository<byte[]>(dataStream, dataStreamMapper, blockSize);
-
-            var storage = new Storage(hash, mapRepository, metadataRepository, dataRepository);
-            var mapProcessorFactory = new MapProcessorFactory(storage);
-
-            return new Repository(storage, mapProcessorFactory, blockSize);
         }
 
         private MemoryStream GenerageData()

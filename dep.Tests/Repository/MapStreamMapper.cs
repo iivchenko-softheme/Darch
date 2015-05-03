@@ -10,7 +10,7 @@ using System.Linq;
 using Deduplication.Storages;
 using RepositoryLib;
 
-namespace Deduplication.Tests
+namespace Deduplication.Tests.Repository
 {
     public class MapStreamMapper : IStreamMapper<MapRecord>
     {
