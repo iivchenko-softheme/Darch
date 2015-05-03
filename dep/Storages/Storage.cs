@@ -47,7 +47,10 @@ namespace Deduplication.Storages
                 lock (_lock)
                 {
                     // TODO: Chek on locable if several threads are working
-                    return _mapRepository.All.Select(x => x.Item.MapId);
+                    return _mapRepository
+                        .All
+                        .Select(x => x.Item.MapId)
+                        .Distinct();
                 }
             }
         }
