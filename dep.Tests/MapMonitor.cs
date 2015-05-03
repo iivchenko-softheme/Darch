@@ -9,25 +9,36 @@ using Deduplication.Maps;
 
 namespace Deduplication.Tests
 {
-    public sealed class ProgressMonitor
+    public sealed class MapMonitor : IDisposable
     {
-        private readonly string _name;
+        private readonly IMapProcessor _map;
         private readonly ulong _step;
+        private readonly string _name;
 
         private ulong _previousValue;
 
-        public ProgressMonitor(string name, ulong step)
+        public MapMonitor(IMapProcessor map)
+            : this(map, 20)
         {
-            _name = name;
+        }
+
+        public MapMonitor(IMapProcessor map, ulong step)
+        {
+            _map = map;
             _step = step;
+
+            _name = _map.GetType().Name;
             _previousValue = 0;
+
+            _map.ProgressChanged += OnProgress;
+            _map.StatusChanged += OnStatus;
         }
 
         public void OnProgress(object sender, ProgressEventArgs args)
         {
             var newValue = (args.Progress.WorkDone * 100) / args.Progress.WorkTotal;
 
-            if (newValue > _previousValue + _step || newValue == 100)
+            if (newValue >= _previousValue + _step || newValue == 100)
             {
                 Console.WriteLine("[{0}] Total: {1}%; Done: {2}", _name, 100, newValue);
 
@@ -37,7 +48,13 @@ namespace Deduplication.Tests
 
         public void OnStatus(object sender, StatusEventArgs args)
         {
-            Console.WriteLine("New status: {0}", args.Status);
+            Console.WriteLine("Map (id: {0}) status changed to '{1}'", _map.Id, args.Status);
+        }
+
+        public void Dispose()
+        {
+            _map.ProgressChanged -= OnProgress;
+            _map.StatusChanged -= OnStatus;
         }
     }
 }

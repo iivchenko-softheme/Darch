@@ -39,32 +39,20 @@ namespace Deduplication.Tests
 
             using (var repo = new ManagedRepository(BlockSize, ChecksumSize))
             {
-                using (var writeMap = repo.Write(sourceStream))
+                using (var map = repo.Write(sourceStream))
+                using (new MapMonitor(map))
                 {
-                    Console.WriteLine("Start write to the repo.");
-                    Console.WriteLine("Write Map Id: {0}", writeMap.Id);
-
-                    var monitor = new ProgressMonitor("Write", 5);
-
-                    writeMap.ProgressChanged += monitor.OnProgress;
-                    writeMap.StatusChanged += monitor.OnStatus;
-
-                    writeMap.Start();
-                    writeMap.Wait();
+                    map.Start();
+                    map.Wait();
                 }
+                
+                Console.WriteLine();
 
-                using (var readMap = repo.Read(0, targetStream))
+                using (var map = repo.Read(0, targetStream))
+                using (new MapMonitor(map))
                 {
-                    Console.WriteLine("Start read from the repo.");
-                    Console.WriteLine("Read Map Id: {0}", readMap.Id);
-
-                    var monitor = new ProgressMonitor("Read", 5);
-                    
-                    readMap.ProgressChanged += monitor.OnProgress;
-                    readMap.StatusChanged += monitor.OnStatus;
-
-                    readMap.Start();
-                    readMap.Wait();
+                    map.Start();
+                    map.Wait();
                 }
             }
 
