@@ -20,22 +20,21 @@ namespace Deduplication.Tests
 
         private const int SourceStreamSize = 10 * 1024 * 1024;
 
-        private Random _random;
+        private int _seed;
 
         [TestFixtureSetUp]
         public void Initialize()
         {
-            var seed = (int)DateTime.Now.Ticks;
+            _seed = (int)DateTime.Now.Ticks;
 
-            _random = new Random(seed);
-
-            Console.WriteLine("Seed: {0}", seed);
+            Console.WriteLine("Seed: {0}", _seed);
         }
 
         [Test]
         public void WriteRead_Test()
         {
-            var sourceStream = GenerageData();
+            var dataGenerator = new DataGenerator(_seed);
+            var sourceStream = dataGenerator.GenerateData(SourceStreamSize);
             var targetStream = new MemoryStream();
 
             using (var repo = new ManagedRepository(BlockSize, ChecksumSize))
@@ -70,15 +69,6 @@ namespace Deduplication.Tests
             }
 
             Assert.AreEqual(sourceStream, targetStream);
-        }
-
-        private MemoryStream GenerageData()
-        {
-            var buffer = new byte[_random.Next(SourceStreamSize)];
-
-            _random.NextBytes(buffer);
-
-            return new MemoryStream(buffer);
         }
     }
 }
