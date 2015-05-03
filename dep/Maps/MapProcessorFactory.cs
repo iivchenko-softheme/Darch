@@ -23,7 +23,7 @@ namespace Deduplication.Maps
             return new ReadProcessor(mapId, target, _storage);
         }
 
-        public IMapProcessor CreateWriteProcessor(ulong mapId, ulong blockSize, Stream source)
+        public IMapProcessor CreateWriteProcessor(ulong mapId, int blockSize, Stream source)
         {
             return new WriteProcessor(mapId, blockSize, source, _storage);
         }

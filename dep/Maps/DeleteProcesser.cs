@@ -17,9 +17,23 @@ namespace Deduplication.Maps
         {
         }
 
-        protected override Action InternalAction()
+        protected override void InternalAction()
         {
-            return () =>
+            WaitResume();
+
+            if (Canceled)
+            {
+                OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
+                return;
+            }
+
+            var mapItems = Storage.ReadMap(Id).ToList();
+            var totalWork = (ulong)mapItems.Count;
+            var doneWork = 0u;
+
+            ProgressInternal = new Progress(totalWork, doneWork);
+
+            foreach (var blockIndex in mapItems)
             {
                 WaitResume();
 
@@ -29,29 +43,12 @@ namespace Deduplication.Maps
                     return;
                 }
 
-                var mapItems = Storage.ReadMap(Id).ToList();
-                var totalWork = (ulong)mapItems.Count;
-                var doneWork = 0u;
+                Storage.DeleteBlockItem(Id, blockIndex);
 
-                ProgressInternal = new Progress(totalWork, doneWork);
+                ProgressInternal = new Progress(totalWork, ++doneWork);
+            }
 
-                foreach (var blockIndex in mapItems)
-                {
-                    WaitResume();
-
-                    if (Canceled)
-                    {
-                        OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
-                        return;
-                    }
-
-                    Storage.DeleteBlockItem(Id, blockIndex);
-
-                    ProgressInternal = new Progress(totalWork, ++doneWork);
-                }
-
-                OnStatusChanged(new StatusEventArgs(MapStatus.Succeeded));
-            };
+            OnStatusChanged(new StatusEventArgs(MapStatus.Succeeded));
         }
     }
 }

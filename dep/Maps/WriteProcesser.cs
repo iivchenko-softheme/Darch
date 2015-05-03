@@ -12,19 +12,32 @@ namespace Deduplication.Maps
 {
     public sealed class WriteProcessor : BaseProcessor
     {
-        private readonly ulong _blockSize;
+        private readonly int _blockSize;
         private readonly Stream _source;
 
-        public WriteProcessor(ulong mapId, ulong blockSize, Stream source, IStorage storage)
+        public WriteProcessor(ulong mapId, int blockSize, Stream source, IStorage storage)
             : base(mapId, storage)
         {
             _source = source;
             _blockSize = blockSize;
         }
-        
-        protected override Action InternalAction()
+
+        protected override void InternalAction()
         {
-            return () =>
+            WaitResume();
+
+            if (Canceled)
+            {
+                OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
+                return;
+            }
+
+            var totalWork = (ulong)_source.Length;
+            ulong doneWork = 0u;
+
+            ProgressInternal = new Progress(totalWork, doneWork);
+
+            while (true)
             {
                 WaitResume();
 
@@ -34,36 +47,20 @@ namespace Deduplication.Maps
                     return;
                 }
 
-                var totalWork = (ulong)(_source.Length / (int)_blockSize);
-                ulong doneWork = 0u;
+                var buffer = new byte[_blockSize];
+                var bytesRead = _source.Read(buffer, 0, _blockSize);
 
-                ProgressInternal = new Progress(totalWork, doneWork);
-
-                while (true)
+                if (bytesRead == 0)
                 {
-                    WaitResume();
-
-                    if (Canceled)
-                    {
-                        OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
-                        return;
-                    }
-
-                    var buffer = new byte[_blockSize];
-                    var bytesRead = _source.Read(buffer, 0, (int)_blockSize);
-
-                    if (bytesRead == 0)
-                    {
-                        OnStatusChanged(new StatusEventArgs(MapStatus.Succeeded));
-                        return;
-                    }
-
-                    Storage.AddBlockItem(Id, buffer, bytesRead);
-
-                    doneWork = doneWork + (ulong)bytesRead;
-                    ProgressInternal = new Progress(totalWork, doneWork);
+                    OnStatusChanged(new StatusEventArgs(MapStatus.Succeeded));
+                    return;
                 }
-            };
+
+                Storage.AddBlockItem(Id, buffer, bytesRead);
+
+                doneWork = doneWork + (ulong)bytesRead;
+                ProgressInternal = new Progress(totalWork, doneWork);
+            }
         }
     }
 }

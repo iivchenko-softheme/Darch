@@ -21,9 +21,24 @@ namespace Deduplication.Maps
             _target = target;
         }
 
-        protected override Action InternalAction()
+        protected override void InternalAction()
         {
-            return () =>
+            WaitResume();
+
+            if (Canceled)
+            {
+                OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
+                return;
+            }
+
+            // TODO: Do all calculations in bytes
+            var mapItems = Storage.ReadMap(Id).ToList();
+            var totalWork = (ulong)mapItems.Count;
+            var doneWork = 0u;
+
+            ProgressInternal = new Progress(totalWork, doneWork);
+
+            foreach (var blockIndex in mapItems)
             {
                 WaitResume();
 
@@ -33,31 +48,14 @@ namespace Deduplication.Maps
                     return;
                 }
 
-                var mapItems = Storage.ReadMap(Id).ToList();
-                var totalWork = (ulong)mapItems.Count;
-                var doneWork = 0u;
+                var block = Storage.ReadBlockItem(Id, blockIndex);
 
-                ProgressInternal = new Progress(totalWork, doneWork);
+                _target.Write(block, 0, block.Length);
 
-                foreach (var blockIndex in mapItems)
-                {
-                    WaitResume();
+                ProgressInternal = new Progress(totalWork, ++doneWork);
+            }
 
-                    if (Canceled)
-                    {
-                        OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
-                        return;
-                    }
-
-                    var block = Storage.ReadBlockItem(Id, blockIndex);
-
-                    _target.Write(block, 0, block.Length);
-
-                    ProgressInternal = new Progress(totalWork, ++doneWork);
-                }
-
-                OnStatusChanged(new StatusEventArgs(MapStatus.Succeeded));
-            };
+            OnStatusChanged(new StatusEventArgs(MapStatus.Succeeded));
         }
     }
 }

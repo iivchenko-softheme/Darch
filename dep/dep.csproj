@@ -66,6 +66,7 @@
     <Compile Include="Storages\IHash.cs" />
     <Compile Include="Storages\IStorage.cs" />
     <Compile Include="Storages\MapRecord.cs" />
+    <Compile Include="Storages\MD5Hash.cs" />
     <Compile Include="Storages\MetadataItem.cs" />
     <Compile Include="Storages\Storage.cs" />
   </ItemGroup>

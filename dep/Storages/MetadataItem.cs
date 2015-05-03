@@ -12,11 +12,6 @@ namespace Deduplication.Storages
     public sealed class MetadataItem
     {
         /// <summary>
-        /// Gets or sets the identifier of the  item.
-        /// </summary>
-        public ulong Id { get; set; }
-
-        /// <summary>
         /// Gets or sets identifier of the data block in the data repository.
         /// </summary>
         public ulong DataId { get; set; }

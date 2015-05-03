@@ -30,7 +30,7 @@ namespace Deduplication.Maps
             _disposed = false;
 
             _pause = new ManualResetEvent(false);
-            _workTask = Task.Factory.StartNew(() => InternalAction());
+            _workTask = Task.Factory.StartNew(InternalAction);
         }
 
         public event EventHandler<StatusEventArgs> StatusChanged;
@@ -144,7 +144,10 @@ namespace Deduplication.Maps
         {
             ThrowIfDisposed();
 
-            Paused = false;
+            if (Paused)
+            {
+                Paused = false;
+            }
 
             SafeExecute(() => _workTask.Wait());
         }
@@ -156,7 +159,7 @@ namespace Deduplication.Maps
             GC.SuppressFinalize(this);
         }
 
-        protected abstract Action InternalAction();
+        protected abstract void InternalAction();
 
         protected void WaitResume()
         {

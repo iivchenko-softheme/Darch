@@ -18,12 +18,12 @@ namespace Deduplication
     {
         private readonly IStorage _storage;
         private readonly IMapProcessorFactory _mapProcessorFactory;
-        private readonly ulong _blockSize;
+        private readonly int _blockSize;
 
         private readonly object _lock;
         private bool _disposed;
 
-        public Repository(IStorage storage, IMapProcessorFactory mapProcessorFactory, ulong blockSize)
+        public Repository(IStorage storage, IMapProcessorFactory mapProcessorFactory, int blockSize)
         {
             _storage = storage;
             _mapProcessorFactory = mapProcessorFactory;

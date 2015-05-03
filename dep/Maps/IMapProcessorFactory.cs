@@ -12,7 +12,7 @@ namespace Deduplication.Maps
     {
         IMapProcessor CreateReadProcessor(ulong mapId, Stream target);
 
-        IMapProcessor CreateWriteProcessor(ulong mapId, ulong blockSize, Stream source);
+        IMapProcessor CreateWriteProcessor(ulong mapId, int blockSize, Stream source);
 
         IMapProcessor CreateDeleteProcessor(ulong mapId);
     }

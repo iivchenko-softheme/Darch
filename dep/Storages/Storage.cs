@@ -34,7 +34,7 @@ namespace Deduplication.Storages
             _metadataRepository = metadataRepository;
             _dataRepository = dataRepository;
 
-            _metadataCache = new Lazy<IDictionary<byte[], ulong>>(() => _metadataRepository.All.ToDictionary(key => key.Item.Checksum, value => value.Item.Id));
+            _metadataCache = new Lazy<IDictionary<byte[], ulong>>(() => _metadataRepository.All.ToDictionary(key => key.Item.Checksum, value => value.Id));
             _lock = new object();
 
             _disposed = false;
@@ -143,7 +143,7 @@ namespace Deduplication.Storages
         }
 
         public void Dispose()
-        {
+       {
             Dispose(true);
 
             GC.SuppressFinalize(this);
