@@ -55,6 +55,7 @@
     <Compile Include="DataStreamMapper.cs" />
     <Compile Include="MapStreamMapper.cs" />
     <Compile Include="MetadataStreamMapper.cs" />
+    <Compile Include="ProgressMonitor.cs" />
     <Compile Include="RepositoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

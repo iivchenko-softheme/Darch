@@ -47,22 +47,10 @@ namespace Deduplication.Tests
                     Console.WriteLine("Start write to the repo.");
                     Console.WriteLine("Write Map Id: {0}", writeMap.Id);
 
-                    ulong prev = 0;
-                    writeMap.ProgressChanged += (sender, args) =>
-                    {
-                        var newV = (args.Progress.WorkDone * 100) / args.Progress.WorkTotal;
-                        if (newV > prev + 5)
-                        {
-                            Console.WriteLine("Total: {0}%; Done: {1}", 100, newV);
-                            
-                            prev = newV;
-                        }
-                    };
+                    var monitor = new ProgressMonitor("Write", 5);
 
-                    writeMap.StatusChanged += (sender, args) =>
-                    {
-                        Console.WriteLine("New status: {0}", args.Status);
-                    };
+                    writeMap.ProgressChanged += monitor.OnProgress;
+                    writeMap.StatusChanged += monitor.OnStatus;
 
                     writeMap.Start();
                     writeMap.Wait();
@@ -73,15 +61,10 @@ namespace Deduplication.Tests
                     Console.WriteLine("Start read from the repo.");
                     Console.WriteLine("Read Map Id: {0}", readMap.Id);
 
-                    readMap.ProgressChanged += (sender, args) =>
-                    {
-                        Console.WriteLine("Total: {0}; Done: {1}", args.Progress.WorkTotal, args.Progress.WorkDone);
-                    };
-
-                    readMap.StatusChanged += (sender, args) =>
-                    {
-                        Console.WriteLine("New status: {0}", args.Status);
-                    };
+                    var monitor = new ProgressMonitor("Read", 5);
+                    
+                    readMap.ProgressChanged += monitor.OnProgress;
+                    readMap.StatusChanged += monitor.OnStatus;
 
                     readMap.Start();
                     readMap.Wait();
