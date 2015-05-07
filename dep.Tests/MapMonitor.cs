@@ -40,7 +40,7 @@ namespace Deduplication.Tests
 
             if (newValue >= _previousValue + _step || newValue == 100)
             {
-                Console.WriteLine("[{0}] Total: {1}%; Done: {2}", _name, 100, newValue);
+                Console.WriteLine("[{0}] [{1}] Total: {2}%; Done: {3}", _map.Id, _name, 100, newValue);
 
                 _previousValue = newValue;
             }
@@ -48,7 +48,7 @@ namespace Deduplication.Tests
 
         public void OnStatus(object sender, StatusEventArgs args)
         {
-            Console.WriteLine("Map (id: {0}) status changed to '{1}'", _map.Id, args.Status);
+            Console.WriteLine("[{0}] [{1}] status changed to '{2}'", _map.Id, _name, args.Status);
         }
 
         public void Dispose()

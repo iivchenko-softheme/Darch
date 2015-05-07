@@ -53,7 +53,7 @@ namespace Deduplication
                 ThrowIfDisposed();
 
                 var ids = _storage.MapIds.ToList();
-                var mapId = ids.Any() ? ids.Max() + 1 : 0;
+                var mapId = ids.Any() ? ids.Max() + 1 : 0; // TODO: Fix
 
                 return _mapProcessorFactory.CreateWriteProcessor(mapId, _blockSize, source);
             }

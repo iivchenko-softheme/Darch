@@ -40,7 +40,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("0.0.0.1")]
 [assembly: AssemblyFileVersion("0.0.0.1")]
 
-// TODO: Check architecture
 // TODO: Add documentation to the interfaces
 // TODO: Add classes with implementations
 // TODO: Add integration tests
