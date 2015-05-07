@@ -127,6 +127,7 @@ namespace Deduplication.Storages
         {
             lock (_lock)
             {
+                // TODO: Check if input exists
                 var mapRecord = _mapRepository.All.Single(x => x.Item.MapId == mapId && x.Item.RecordIndex == blockIndex);
                 var metadataId = mapRecord.Item.BlockId;
                 var metadataItem = _metadataRepository.GetById(metadataId);
@@ -139,16 +140,19 @@ namespace Deduplication.Storages
                 }
                 else
                 {
-                    _mapRepository.Delete(mapRecord.Id);
                     _metadataRepository.Delete(metadataId);
                     _dataRepository.Delete(metadataItem.DataId);
                 }
+
+                _mapRepository.Delete(mapRecord.Id);
             }
         }
 
         public void Dispose()
        {
             Dispose(true);
+            
+            _disposed = true;
 
             GC.SuppressFinalize(this);
         }
@@ -160,8 +164,6 @@ namespace Deduplication.Storages
                 _mapRepository.Dispose();
                 _metadataRepository.Dispose();
                 _dataRepository.Dispose();
-
-                _disposed = true;
             }
         }
     }
