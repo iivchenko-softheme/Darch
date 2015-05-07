@@ -10,27 +10,27 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Deduplication.Maps;
-using Deduplication.Storages;
 
 namespace Deduplication
 {
     public sealed class Repository : IRepository
     {
-        private readonly IStorage _storage;
         private readonly IMapProcessorFactory _mapProcessorFactory;
         private readonly int _blockSize;
 
+        private readonly IList<ulong> _mapIdsCahce;
         private readonly object _lock;
         private bool _disposed;
 
-        public Repository(IStorage storage, IMapProcessorFactory mapProcessorFactory, int blockSize)
+        public Repository(IMapProcessorFactory mapProcessorFactory, IList<ulong> mapIdsCache, int blockSize)
         {
-            _storage = storage;
             _mapProcessorFactory = mapProcessorFactory;
             _blockSize = blockSize;
 
             _lock = new object();
             _disposed = false;
+
+            _mapIdsCahce = mapIdsCache;
         }
 
         public IEnumerable<ulong> Maps
@@ -41,7 +41,7 @@ namespace Deduplication
                 {
                     ThrowIfDisposed();
 
-                    return _storage.MapIds;
+                    return _mapIdsCahce;
                 }
             }
         }
@@ -51,9 +51,10 @@ namespace Deduplication
             lock (_lock)
             {
                 ThrowIfDisposed();
+                
+                var mapId = _mapIdsCahce.Any() ? _mapIdsCahce.Max() + 1 : 0;
 
-                var ids = _storage.MapIds.ToList();
-                var mapId = ids.Any() ? ids.Max() + 1 : 0; // TODO: Fix
+                _mapIdsCahce.Add(mapId);
 
                 return _mapProcessorFactory.CreateWriteProcessor(mapId, _blockSize, source);
             }
@@ -76,16 +77,34 @@ namespace Deduplication
             {
                 ThrowIfDisposed();
                 ThrowIfMapNotExists(mapId);
+                EventHandler<StatusEventArgs> statusAction = null;
 
-                return _mapProcessorFactory.CreateDeleteProcessor(mapId);
+                var map = _mapProcessorFactory.CreateDeleteProcessor(mapId);
+                
+                statusAction = (sender, args) =>
+                               {
+                                   if (args.Status == MapStatus.Succeeded)
+                                   {
+                                       _mapIdsCahce.Remove(mapId);
+                                   }
+
+                                   if (args.Status == MapStatus.Canceled || 
+                                       args.Status == MapStatus.Failed ||
+                                       args.Status == MapStatus.Succeeded)
+                                   {
+                                       map.StatusChanged -= statusAction;
+                                   }
+                               };
+
+                map.StatusChanged += statusAction;
+
+                return map;
             }
         }
 
         public void Dispose()
         {
             ThrowIfDisposed();
-
-            _storage.Dispose();
 
             _disposed = true;
         }
@@ -100,7 +119,7 @@ namespace Deduplication
 
         private void ThrowIfMapNotExists(ulong mapId)
         {
-            if (!_storage.MapIds.Contains(mapId))
+            if (!_mapIdsCahce.Contains(mapId))
             {
                 var msg = string.Format(CultureInfo.InvariantCulture, "Map with specified id '{0}' doesn't exist in the repository.", mapId);
 
