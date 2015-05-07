@@ -51,7 +51,8 @@ namespace Deduplication.Storages
                     return _mapRepository
                         .All
                         .Select(x => x.Item.MapId)
-                        .Distinct();
+                        .Distinct()
+                        .ToList();
                 }
             }
         }
@@ -60,7 +61,11 @@ namespace Deduplication.Storages
         {
             lock (_lock)
             {
-                return _mapRepository.All.Where(x => x.Item.MapId == mapId).Select(x => x.Item.RecordIndex);
+                return _mapRepository
+                    .All
+                    .Where(x => x.Item.MapId == mapId)
+                    .Select(x => x.Item.RecordIndex)
+                    .ToList();
             }
         }
 

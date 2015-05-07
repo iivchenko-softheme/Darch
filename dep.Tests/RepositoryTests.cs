@@ -5,10 +5,17 @@
 // <email>iivchenko@live.com</email>
 
 using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
+using System.Management.Instrumentation;
+using System.Threading.Tasks;
+using Deduplication.Tests.Data;
 using Deduplication.Tests.Repository;
+using Deduplication.Utility;
 using NUnit.Framework;
+using FileInfo = Deduplication.Tests.Data.FileInfo;
 
 namespace Deduplication.Tests
 {
@@ -19,7 +26,7 @@ namespace Deduplication.Tests
         private const int BlockSize = 8 * 1024;
         private const int ChecksumSize = Md5ChecksumSize;
 
-        private const int SourceStreamSize = 10 * 1024 * 1024;
+        private const int SourceStreamSize = 100 * 1024 * 1024;
 
         private int _seed;
 
@@ -34,7 +41,7 @@ namespace Deduplication.Tests
         [Test]
         public void WriteRead_Test()
         {
-            var dataGenerator = new DataGenerator(_seed);
+            var dataGenerator = new DataManager(_seed);
             var sourceStream = dataGenerator.GenerateData(SourceStreamSize);
             var targetStream = new MemoryStream();
 
@@ -64,8 +71,8 @@ namespace Deduplication.Tests
         [Description("Add some maps. Delete on of them. Check if deleted map is no longer available.")]
         public void Delete_Test()
         {
-            var dataGenerator = new DataGenerator(_seed);
-            var sourceStream = dataGenerator.GenerateData(SourceStreamSize);
+            var dataGenerator = new DataManager(_seed);
+            var sourceStream = dataGenerator.GenerateData(10);
 
             using (var repo = new ManagedRepository(BlockSize, ChecksumSize))
             {
@@ -105,7 +112,7 @@ namespace Deduplication.Tests
         public void Deduplication_Test()
         {
             // Generate test data
-            var dataGenerator = new DataGenerator(_seed);
+            var dataGenerator = new DataManager(_seed);
             var sourceStream = dataGenerator.GenerateData(SourceStreamSize);
 
             using (var repo = new ManagedRepository(BlockSize, ChecksumSize))
@@ -139,6 +146,100 @@ namespace Deduplication.Tests
                 Assert.AreEqual(expectedMetadataSize, actualMetadataSize, "Metadata");
                 Assert.AreEqual(expectedDataSize, actualdDataSize, "Data");
             }
+        }
+
+        [Test]
+        [Explicit]
+        [Description("Generate several files. Write them to a repository. Restore them and check integrity. Also measure speed of Write, Read and Delete.")]
+        public void Performance_Test()
+        {
+            const int FilesCount = 2;
+            const int FileSize = 1 * 1024 * 1024; // 100 MB
+
+            var workDir = Path.Combine(Path.GetTempPath(), "Performance_Test\\");
+
+            if (Directory.Exists(workDir))
+            {
+                Directory.Delete(workDir, true);
+            }
+
+            Directory.CreateDirectory(workDir);
+
+            Func<string> getFilePath = () => Path.Combine(workDir, Path.GetRandomFileName());
+
+            var mapFilePath = getFilePath();
+            var metadataFilePath = getFilePath();
+            var dataFilePath = getFilePath();
+
+            var sourceFiles = new List<FileInfo>(FilesCount);
+            var targetFiles = new List<FileInfo>(FilesCount);
+            var dataManager = new DataManager(_seed);
+
+            Action<FileInfo, IRepository> write = (fileInfo, repo) =>
+                                                              {
+                                                                  using (var file = File.Open(fileInfo.Path, FileMode.Open))
+                                                                  using (var map = repo.Write(file))
+                                                                  using (new MapMonitor(map))
+                                                                  {
+                                                                      map.Start();
+                                                                      map.Wait();
+
+                                                                      fileInfo.MapId = map.Id;
+                                                                  }
+                                                              };
+
+            Action<FileInfo, IList<FileInfo>, IRepository> read = (fileInfo, files, repo) =>
+                                                             {
+                                                                 var path = getFilePath();
+
+                                                                 using (var file = File.Create(path))
+                                                                 using (var map = repo.Read(fileInfo.MapId, file))
+                                                                 using (new MapMonitor(map))
+                                                                 {
+                                                                     map.Start();
+                                                                     map.Wait();
+                                                                 }
+
+                                                                 var targetFile = new FileInfo
+                                                                                  {
+                                                                                      Hash = dataManager.CalculateHash(path),
+                                                                                      Path = path,
+                                                                                      MapId = fileInfo.MapId,
+                                                                                      Size = 0 // calculate
+                                                                                  };
+
+                                                                 targetFiles.Add(targetFile);
+                                                             };
+
+            Console.WriteLine("Map File: {0}", mapFilePath);
+            Console.WriteLine("Metadata File: {0}", metadataFilePath);
+            Console.WriteLine("Data File: {0}", dataFilePath);
+            Console.WriteLine();
+
+            using (var repo = new ManagedRepository(BlockSize, ChecksumSize, File.Create(mapFilePath), File.Create(metadataFilePath), File.Create(dataFilePath)))
+            {
+                Console.WriteLine("=== Generating files (count: {0}) ===", FilesCount);
+                Parallel.For(0, FilesCount, i => sourceFiles.Add(dataManager.GenerateFile(FileSize)));
+                Console.WriteLine();
+
+                Console.WriteLine("=== Writing files to the repo ===");
+                Parallel.ForEach(sourceFiles, file => write(file, repo));
+                Console.WriteLine();
+
+                Console.WriteLine("=== Reading files from the repo ===");
+                Parallel.ForEach(sourceFiles, mapId => read(mapId, targetFiles, repo));
+                Console.WriteLine();
+            }
+
+            foreach (var source in sourceFiles)
+            {
+                var target = targetFiles.Single(x => x.MapId == source.MapId);
+
+                Assert.AreEqual(source.Hash, target.Hash);
+            }
+
+            // Clear Section
+            Directory.Delete(workDir, true);
         }
     }
 }

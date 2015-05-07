@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Deduplication.Maps;
 using Deduplication.Storages;
 using RepositoryLib;
@@ -15,28 +16,34 @@ namespace Deduplication.Tests.Repository
     public sealed class ManagedRepository : IRepository
     {
         private readonly IRepository _repository;
+        private readonly IStorage _storage;
 
         public ManagedRepository(int blockSize, int checksumSize)
+            : this(blockSize, checksumSize, new MemoryStream(), new MemoryStream(), new MemoryStream())
+        {
+        }
+
+        public ManagedRepository(int blockSize, int checksumSize, Stream mapStream, Stream metadataStream, Stream dataStream)
         {
             var hash = new MD5Hash();
 
-            MapStream = new MemoryStream();
-            MetadataStream = new MemoryStream();
-            DataStream = new MemoryStream();
+            MapStream = mapStream;
+            MetadataStream = metadataStream;
+            DataStream = dataStream;
 
             var mapStreamMapper = new MapStreamMapper();
             var mapRepository = new StreamRepository<MapRecord>(MapStream, mapStreamMapper, MapStreamMapper.BufferSize);
-            
+
             var metadataStreamMapper = new MetadataStreamMapper(checksumSize);
             var metadataRepository = new StreamRepository<MetadataItem>(MetadataStream, metadataStreamMapper, metadataStreamMapper.BufferSize);
-            
+
             var dataStreamMapper = new DataStreamMapper(blockSize);
             var dataRepository = new StreamRepository<byte[]>(DataStream, dataStreamMapper, blockSize);
 
-            var storage = new Storage(hash, mapRepository, metadataRepository, dataRepository);
-            var mapProcessorFactory = new MapProcessorFactory(storage);
+            _storage = new Storage(hash, mapRepository, metadataRepository, dataRepository);
+            var mapProcessorFactory = new MapProcessorFactory(_storage);
 
-            _repository = new Deduplication.Repository(storage, mapProcessorFactory, blockSize);
+            _repository = new Deduplication.Repository(mapProcessorFactory, _storage.MapIds.ToList(), blockSize);
         }
 
         public Stream MapStream { get; private set; }
@@ -68,6 +75,7 @@ namespace Deduplication.Tests.Repository
         public void Dispose()
         {
             _repository.Dispose();
+            _storage.Dispose();
         }
     }
 }
