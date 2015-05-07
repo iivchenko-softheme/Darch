@@ -4,13 +4,15 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-using System;
 using System.IO;
 using System.Linq;
 using Deduplication.Storages;
 
 namespace Deduplication.Maps
 {
+    /// <summary>
+    /// Read data from the specified map.
+    /// </summary>
     public sealed class ReadProcessor : BaseProcessor
     {
         private readonly Stream _target;
@@ -25,9 +27,9 @@ namespace Deduplication.Maps
         {
             WaitResume();
 
-            if (Canceled)
+            if (Status == MapStatus.Canceling)
             {
-                OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
+                Status = MapStatus.Canceled;
                 return;
             }
 
@@ -36,15 +38,15 @@ namespace Deduplication.Maps
             var totalWork = (ulong)mapItems.Count;
             var doneWork = 0u;
 
-            ProgressInternal = new Progress(totalWork, doneWork);
+            Progress = new Progress(totalWork, doneWork);
 
             foreach (var blockIndex in mapItems)
             {
                 WaitResume();
 
-                if (Canceled)
+                if (Status == MapStatus.Canceling)
                 {
-                    OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
+                    Status = MapStatus.Canceled;
                     return;
                 }
 
@@ -52,10 +54,10 @@ namespace Deduplication.Maps
 
                 _target.Write(block, 0, block.Length);
 
-                ProgressInternal = new Progress(totalWork, ++doneWork);
+                Progress = new Progress(totalWork, ++doneWork);
             }
 
-            OnStatusChanged(new StatusEventArgs(MapStatus.Succeeded));
+            Status = MapStatus.Succeeded;
         }
     }
 }

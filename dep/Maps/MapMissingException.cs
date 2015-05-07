@@ -6,10 +6,12 @@
 
 using System;
 using System.Runtime.Serialization;
-using RepositoryLib;
 
 namespace Deduplication.Maps
 {
+    /// <summary>
+    /// Throws when it is impossible to find specified map.
+    /// </summary>
     [Serializable]
     public sealed class MapMissingException : DeduplicationException
     {

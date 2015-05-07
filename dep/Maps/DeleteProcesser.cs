@@ -4,12 +4,14 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-using System;
 using System.Linq;
 using Deduplication.Storages;
 
 namespace Deduplication.Maps
 {
+    /// <summary>
+    /// Deletes specified map from the storage.
+    /// </summary>
     public sealed class DeleteProcessor : BaseProcessor
     {
         public DeleteProcessor(ulong mapId, IStorage storage)
@@ -21,9 +23,9 @@ namespace Deduplication.Maps
         {
             WaitResume();
 
-            if (Canceled)
+            if (Status == MapStatus.Canceling)
             {
-                OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
+                Status = MapStatus.Canceled;
                 return;
             }
 
@@ -31,24 +33,24 @@ namespace Deduplication.Maps
             var totalWork = (ulong)mapItems.Count;
             var doneWork = 0u;
 
-            ProgressInternal = new Progress(totalWork, doneWork);
+            Progress = new Progress(totalWork, doneWork);
 
             foreach (var blockIndex in mapItems)
             {
                 WaitResume();
 
-                if (Canceled)
+                if (Status == MapStatus.Canceling)
                 {
-                    OnStatusChanged(new StatusEventArgs(MapStatus.Canceled));
+                    Status = MapStatus.Canceled;
                     return;
                 }
 
                 Storage.DeleteBlockItem(Id, blockIndex);
 
-                ProgressInternal = new Progress(totalWork, ++doneWork);
+                Progress = new Progress(totalWork, ++doneWork);
             }
 
-            OnStatusChanged(new StatusEventArgs(MapStatus.Succeeded));
+            Status = MapStatus.Succeeded;
         }
     }
 }

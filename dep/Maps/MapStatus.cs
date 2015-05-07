@@ -15,6 +15,7 @@ namespace Deduplication.Maps
         InProgress,
         Paused,
         Failed,
+        Canceling,
         Canceled,
         Succeeded
     }

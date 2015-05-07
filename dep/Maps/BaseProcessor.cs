@@ -8,9 +8,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Deduplication.Storages;
+using Deduplication.Utility;
 
 namespace Deduplication.Maps
 {
+    /// <summary>
+    /// Infrastructure for different map processors. Provides Status, Progress, Start, Pause, Resume, Cancel etc. API.
+    /// </summary>
     public abstract class BaseProcessor : IMapProcessor
     {
         private readonly Task _workTask;
@@ -19,9 +23,13 @@ namespace Deduplication.Maps
         private MapStatus _status;
         private Progress _progress;
         
-        private bool _paused;
         private bool _disposed;
         
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BaseProcessor"/> class.
+        /// </summary>
+        /// <param name="mapId">The identifier of the processing map.</param>
+        /// <param name="storage">The storage with the data that is handled by the processor.</param>
         protected BaseProcessor(ulong mapId, IStorage storage)
         {
             Id = mapId;
@@ -30,184 +38,186 @@ namespace Deduplication.Maps
             _disposed = false;
 
             _pause = new ManualResetEvent(false);
-            _workTask = Task.Factory.StartNew(InternalAction);
+            _workTask = new Task(Execute);
         }
 
+        /// <summary>
+        /// Raises when the processor changes it's status.
+        /// </summary>
         public event EventHandler<StatusEventArgs> StatusChanged;
 
+        /// <summary>
+        /// Raises with the processor changes it's progress.
+        /// </summary>
         public event EventHandler<ProgressEventArgs> ProgressChanged;
 
+        /// <summary>
+        /// Gets map identifier.
+        /// </summary>
         public ulong Id { get; private set; }
 
+        /// <summary>
+        /// Gets or sets current processor status.
+        /// </summary>
         public MapStatus Status
         {
             get
             {
                 ThrowIfDisposed();
 
-                return StatusInternal;
+                return _status;
+            }
+
+            protected set
+            {
+                _status = value;
+
+                OnStatusChanged();
             }
         }
 
+        /// <summary>
+        /// Gets or sets current processor progress.
+        /// </summary>
         public Progress Progress
         {
             get
             {
                 ThrowIfDisposed();
 
-                return ProgressInternal;
-            }
-        }
-
-        protected MapStatus StatusInternal
-        {
-            get
-            {
-                return _status;
-            }
-            
-            set
-            {
-                _status = value;
-
-                OnStatusChanged(new StatusEventArgs(_status));
-            }
-        }
-
-        protected Progress ProgressInternal
-        {
-            get
-            {
                 return _progress;
             }
 
-            set
+            protected set
             {
                 _progress = value;
 
-                OnProgressChanged(new ProgressEventArgs(_progress));
+                OnProgressChanged();
             }
         }
 
+        /// <summary>
+        /// Gets access to the storage so derived processor can use it.
+        /// </summary>
         protected IStorage Storage { get; private set; }
 
-        protected bool Canceled { get; set; }
-
-        protected bool Paused
-        {
-            get
-            {
-                return _paused;
-            }
-
-            set
-            {
-                _paused = value;
-
-                if (_paused)
-                {
-                    _pause.Reset();
-
-                    OnStatusChanged(new StatusEventArgs(MapStatus.Paused));
-                }
-                else
-                {
-                    _pause.Set();
-
-                    OnStatusChanged(new StatusEventArgs(MapStatus.InProgress));
-                }
-            }
-        }
-
+        /// <summary>
+        /// Starts processor task. If the processor is on pause - continue execution.
+        /// </summary>
         public void Start()
         {
             ThrowIfDisposed();
+            
+            _pause.Set();
+            
+            if (_workTask.Status == TaskStatus.Created)
+            {
+                _workTask.Start();
+            }
 
-            Paused = false;
+            Status = MapStatus.InProgress;
         }
 
+        /// <summary>
+        /// Stops and terminates processor task execution.
+        /// </summary>
         public void Cancel()
         {
             ThrowIfDisposed();
 
-            Canceled = true;
+            Status = MapStatus.Canceling;
         }
 
+        /// <summary>
+        /// Suspend processor task execution.
+        /// </summary>
         public void Pause()
         {
             ThrowIfDisposed();
 
-            Paused = true;
+            _pause.Reset();
+
+            Status = MapStatus.Paused;
         }
 
+        /// <summary>
+        /// Hangs current thread until processor task finished.
+        /// </summary>
         public void Wait()
         {
             ThrowIfDisposed();
-
-            if (Paused)
-            {
-                Paused = false;
-            }
-
-            SafeExecute(() => _workTask.Wait());
+            
+            _workTask.Wait();
         }
 
         public void Dispose()
         {
             Dispose(true);
 
+            _disposed = true;
+
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Specify production code in derived classes.
+        /// </summary>
         protected abstract void InternalAction();
 
+        /// <summary>
+        /// In case of user pauses the processor the derived class should wait un pause.
+        /// </summary>
         protected void WaitResume()
         {
             _pause.WaitOne();
         }
 
-        protected void OnStatusChanged(StatusEventArgs e)
-        {
-            var statusChanged = StatusChanged;
-
-            if (statusChanged != null)
-            {
-                statusChanged(this, e);
-            }
-        }
-
-        protected void OnProgressChanged(ProgressEventArgs e)
-        {
-            var progressChanged = ProgressChanged;
-
-            if (progressChanged != null)
-            {
-                progressChanged(this, e);
-            }
-        }
-
         protected virtual void Dispose(bool disposing)
         {
+            if (Status == MapStatus.InProgress || Status == MapStatus.Pending)
+            {
+                Status = MapStatus.Canceling;
+                
+                _pause.Set();
+
+                _workTask.Wait();
+            }
+
             if (disposing && !_disposed)
             {
                 _workTask.Dispose();
                 _pause.Dispose();
-
-                _disposed = true;
             }
         }
 
-        private static void SafeExecute(Action action)
-        {
-            // TODO: Finish with the status changes
-            action();
-        }
-        
-        private void ThrowIfDisposed()
+        protected void ThrowIfDisposed()
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException("The repository is disposed.");
+                throw new ObjectDisposedException("The processor is disposed.");
+            }
+        }
+
+        private void OnStatusChanged()
+        {
+            StatusChanged.OnEvent(this, new StatusEventArgs(_status));
+        }
+
+        private void OnProgressChanged()
+        {
+            ProgressChanged.OnEvent(this, new ProgressEventArgs(_progress));
+        }
+
+        private void Execute()
+        {
+            try
+            {
+                InternalAction();
+            }
+            catch
+            {
+                Status = MapStatus.Failed;
+                throw;
             }
         }
     }
