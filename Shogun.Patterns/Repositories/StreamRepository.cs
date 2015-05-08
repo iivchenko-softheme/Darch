@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Shogun.Utility;
 
 namespace Shogun.Patterns.Repositories
 {
@@ -38,6 +39,9 @@ namespace Shogun.Patterns.Repositories
             IStreamMapper<TItem> streamMapper,
             int itemSize)
         {
+            Validate.Null(stream, "stream");
+            Validate.Null(streamMapper, "streamMapper");
+
             _stream = stream;
             _streamMapper = streamMapper;
             _itemSize = itemSize;
@@ -82,6 +86,8 @@ namespace Shogun.Patterns.Repositories
 
         public ulong Add(TItem item)
         {
+            Validate.Null(item, "item");
+
             var newId = _cache.Value.Count == 0 ? 1 : _cache.Value.Keys.Max() + 1;
             var newIndex = _stream.Length;
 
@@ -120,6 +126,8 @@ namespace Shogun.Patterns.Repositories
 
         public void Update(ulong id, TItem item)
         {
+            Validate.Null(item, "item");
+
             ThrowIfItemNotExists(id);
 
             WriteItem(GetItemIndex(id), item);

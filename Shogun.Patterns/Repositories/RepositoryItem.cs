@@ -4,6 +4,8 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
+using Shogun.Utility;
+
 namespace Shogun.Patterns.Repositories
 {
     /// <summary>
@@ -15,6 +17,9 @@ namespace Shogun.Patterns.Repositories
     {
         public RepositoryItem(TId id, TItem item)
         {
+            Validate.Null(id, "id");
+            Validate.Null(item, "item");
+
             Id = id;
             Item = item;
         }
