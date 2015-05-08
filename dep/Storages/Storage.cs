@@ -12,6 +12,8 @@ using RepositoryLib;
 
 namespace Deduplication.Storages
 {
+    // TODO: This will be the Reposiry so rename it after project migration.
+    // TODO: add parameters validation.
     public sealed class Storage : IStorage
     {
         private readonly IHash _hash;
@@ -19,6 +21,7 @@ namespace Deduplication.Storages
         private readonly IRepository<MetadataItem, ulong> _metadataRepository;
         private readonly IRepository<byte[], ulong> _dataRepository;
 
+        // TODO: I hope that in future the cahce will no longer be necessary. I wish to create CachedRepository based on IRepository
         private readonly Lazy<IDictionary<byte[], ulong>> _metadataCache;
         private readonly object _lock;
 
@@ -41,6 +44,7 @@ namespace Deduplication.Storages
             _disposed = false;
         }
 
+        // TODO: Change to IReadOnlyCollection
         public IEnumerable<ulong> MapIds 
         {
             get
@@ -57,6 +61,8 @@ namespace Deduplication.Storages
             }
         }
 
+        // TODO: Change to IReadOnlyCollection
+        // TODO: Rename to TakeMap
         public IEnumerable<ulong> ReadMap(ulong mapId)
         {
             lock (_lock)
@@ -69,6 +75,7 @@ namespace Deduplication.Storages
             }
         }
 
+        // TODO: rename to AddBlock
         public void AddBlockItem(ulong mapId, byte[] block, int realSize)
         {
             lock (_lock)
@@ -116,6 +123,7 @@ namespace Deduplication.Storages
             }
         }
 
+        // TODO: rename to TakeBlock
         public byte[] ReadBlockItem(ulong mapId, ulong blockIndex)
         {
             lock (_lock)
@@ -128,6 +136,7 @@ namespace Deduplication.Storages
             }
         }
 
+        // TODO: Rename to RemoveBlock
         public void DeleteBlockItem(ulong mapId, ulong blockIndex)
         {
             lock (_lock)
@@ -154,7 +163,7 @@ namespace Deduplication.Storages
         }
 
         public void Dispose()
-       {
+        {
             Dispose(true);
             
             _disposed = true;

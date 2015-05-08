@@ -13,6 +13,8 @@ using Deduplication.Maps;
 
 namespace Deduplication
 {
+    // TODO: Rename it to repository manager
+    // TODO: add map management, so one map could be opented for one task at a time
     public sealed class Repository : IRepository
     {
         private readonly IMapProcessorFactory _mapProcessorFactory;
@@ -30,7 +32,7 @@ namespace Deduplication
             _lock = new object();
             _disposed = false;
 
-            _mapIdsCahce = mapIdsCache;
+            _mapIdsCahce = mapIdsCache; // TODO: Move map ids cachin on the level below => Storage
         }
 
         public IEnumerable<ulong> Maps

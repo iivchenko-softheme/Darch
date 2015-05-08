@@ -16,7 +16,7 @@ namespace Deduplication.Storages
         /// </summary>
         /// <param name="mapId">The identifier of the map.</param>
         /// <param name="blockId">The identifier of the block in the map.</param>
-        /// <param name="recordIndex">The index number of the map record in the map.</param>
+        /// <param name="recordIndex">The index number of the block in the map.</param>
         public MapRecord(ulong mapId, ulong blockId, ulong recordIndex)
         {
             MapId = mapId;
@@ -35,7 +35,7 @@ namespace Deduplication.Storages
         public ulong BlockId { get; private set; }
 
         /// <summary>
-        /// Gets the index number of the map record in the map.
+        /// Gets the index number of the block in the map record.
         /// </summary>
         public ulong RecordIndex { get; private set; }
     }
