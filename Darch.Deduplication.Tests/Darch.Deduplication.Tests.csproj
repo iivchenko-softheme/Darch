@@ -69,6 +69,10 @@
       <Project>{119458db-2d4e-436b-b4a2-ab1cee1bafd2}</Project>
       <Name>Shogun.Patterns</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Shogun.Utility\Shogun.Utility.csproj">
+      <Project>{5e917f1a-7e3f-45e8-822f-d12ef6d9045d}</Project>
+      <Name>Shogun.Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\_solutionitems\CodeAnalysisDictionary.xml">

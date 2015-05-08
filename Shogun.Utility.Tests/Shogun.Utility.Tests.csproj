@@ -4,15 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2544E730-2347-4C93-A348-D91E9A97AC86}</ProjectGuid>
+    <ProjectGuid>{A6E2799E-4888-40F1-A304-56339DAB1573}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Shogun.Patterns.Tests.Integration</RootNamespace>
-    <AssemblyName>Shogun.Patterns.Tests.Integration</AssemblyName>
+    <RootNamespace>Shogun.Utility.Tests</RootNamespace>
+    <AssemblyName>Shogun.Utility.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
     <TargetFrameworkProfile />
+    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\_sdks\Shogun.Tests.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -32,13 +33,11 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\_sdks\Shogun.Tests.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Moq">
-      <HintPath>..\_sdks\Moq\Moq.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\_sdks\NUnit\nunit.framework.dll</HintPath>
     </Reference>
@@ -51,16 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Repositories\StreamRepositoryTestItem.cs" />
-    <Compile Include="Repositories\StreamRepositoryTestMapper.cs" />
-    <Compile Include="Repositories\StreamRepositoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Shogun.Patterns\Shogun.Patterns.csproj">
-      <Project>{119458db-2d4e-436b-b4a2-ab1cee1bafd2}</Project>
-      <Name>Shogun.Patterns</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Shogun.Utility\Shogun.Utility.csproj">
       <Project>{5e917f1a-7e3f-45e8-822f-d12ef6d9045d}</Project>
       <Name>Shogun.Utility</Name>
