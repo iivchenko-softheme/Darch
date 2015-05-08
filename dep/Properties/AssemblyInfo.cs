@@ -40,6 +40,10 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("0.0.0.1")]
 [assembly: AssemblyFileVersion("0.0.0.1")]
 
+// TODO: Make project as a part of the deduplicaton Arhive solution
+// TODO: Allow read and write buffer that equal 10 MB
+// TODO: Add write read producer consomer
+// TODO: Implement lock on a specific map. So there will no oportunity to open map in read and write and delete mode.
 // TODO: Add documentation to the interfaces
 // TODO: Add classes with implementations
 // TODO: Add integration tests
