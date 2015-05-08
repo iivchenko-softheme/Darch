@@ -46,6 +46,8 @@ namespace Shogun.Patterns.Repositories
             _streamMapper = streamMapper;
             _itemSize = itemSize;
 
+            // TODO: Think on smart cache that will work faster and which doesn't need to preload all elements at once.
+            // TODO: the first item (or some firs bytes) should be an next id and validity flag
             _cache = new Lazy<IDictionary<ulong, long>>(() =>
                                                       {
                                                           var cache = new Dictionary<ulong, long>();
@@ -69,6 +71,7 @@ namespace Shogun.Patterns.Repositories
             get { return (uint)_stream.Length / (uint)(IdSize + _itemSize); }
         }
 
+        // TODO: Make an IReadOnlyCollection or make it thread safe
         public IEnumerable<RepositoryItem<ulong, TItem>> All
         {
             get
