@@ -6,10 +6,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Management.Instrumentation;
 using System.Threading.Tasks;
 using Deduplication.Tests.Data;
 using Deduplication.Tests.Repository;
@@ -153,8 +151,8 @@ namespace Deduplication.Tests
         [Description("Generate several files. Write them to a repository. Restore them and check integrity. Also measure speed of Write, Read and Delete.")]
         public void Performance_Test()
         {
-            const int FilesCount = 2;
-            const int FileSize = 1 * 1024 * 1024; // 100 MB
+            const int FilesCount = 1;
+            const int FileSize = 100 * 1024 * 1024;
 
             var workDir = Path.Combine(Path.GetTempPath(), "Performance_Test\\");
 
@@ -167,9 +165,9 @@ namespace Deduplication.Tests
 
             Func<string> getFilePath = () => Path.Combine(workDir, Path.GetRandomFileName());
 
-            var mapFilePath = getFilePath();
-            var metadataFilePath = getFilePath();
-            var dataFilePath = getFilePath();
+            var mapFilePath = Path.Combine(workDir, "map.dat");
+            var metadataFilePath = Path.Combine(workDir, "metadata.dat");
+            var dataFilePath = Path.Combine(workDir, "data.dat");
 
             var sourceFiles = new List<FileInfo>(FilesCount);
             var targetFiles = new List<FileInfo>(FilesCount);
@@ -211,11 +209,6 @@ namespace Deduplication.Tests
                                                                  targetFiles.Add(targetFile);
                                                              };
 
-            Console.WriteLine("Map File: {0}", mapFilePath);
-            Console.WriteLine("Metadata File: {0}", metadataFilePath);
-            Console.WriteLine("Data File: {0}", dataFilePath);
-            Console.WriteLine();
-
             using (var repo = new ManagedRepository(BlockSize, ChecksumSize, File.Create(mapFilePath), File.Create(metadataFilePath), File.Create(dataFilePath)))
             {
                 Console.WriteLine("=== Generating files (count: {0}) ===", FilesCount);
@@ -229,13 +222,21 @@ namespace Deduplication.Tests
                 Console.WriteLine("=== Reading files from the repo ===");
                 Parallel.ForEach(sourceFiles, mapId => read(mapId, targetFiles, repo));
                 Console.WriteLine();
-            }
+                
+                foreach (var source in sourceFiles)
+                {
+                    var target = targetFiles.Single(x => x.MapId == source.MapId);
 
-            foreach (var source in sourceFiles)
-            {
-                var target = targetFiles.Single(x => x.MapId == source.MapId);
+                    Assert.AreEqual(source.Hash, target.Hash);
+                }
 
-                Assert.AreEqual(source.Hash, target.Hash);
+                Console.WriteLine("Map File: {0} => {1}", mapFilePath, repo.MapStream.Length.ToDigitalInfoUnit());
+                Console.WriteLine("Metadata File: {0} => {1}", metadataFilePath, repo.MetadataStream.Length.ToDigitalInfoUnit());
+                Console.WriteLine("Data File: {0} => {1}", dataFilePath, repo.DataStream.Length.ToDigitalInfoUnit());
+                Console.WriteLine();
+
+                Console.WriteLine("Total source files size on the disk: {0}", sourceFiles.Select(x => x.Size).Aggregate(0, (i, i1) => i + i1).ToDigitalInfoUnit());
+                Console.WriteLine("Total size of the repository files: {0}", ((int)(repo.DataStream.Length + repo.MetadataStream.Length + repo.MapStream.Length)).ToDigitalInfoUnit());
             }
 
             // Clear Section

@@ -5,6 +5,7 @@
 // <email>iivchenko@live.com</email>
 
 using System;
+using System.Diagnostics;
 using Deduplication.Maps;
 
 namespace Deduplication.Tests
@@ -13,7 +14,9 @@ namespace Deduplication.Tests
     {
         private readonly IMapProcessor _map;
         private readonly ulong _step;
+        
         private readonly string _name;
+        private readonly Stopwatch _stopwatch;
 
         private ulong _previousValue;
 
@@ -28,6 +31,8 @@ namespace Deduplication.Tests
             _step = step;
 
             _name = _map.GetType().Name;
+            _stopwatch = new Stopwatch();
+
             _previousValue = 0;
 
             _map.ProgressChanged += OnProgress;
@@ -40,15 +45,32 @@ namespace Deduplication.Tests
 
             if (newValue >= _previousValue + _step || newValue == 100)
             {
-                Console.WriteLine("[{0}] [{1}] Total: {2}%; Done: {3}", _map.Id, _name, 100, newValue);
-
+                Console.WriteLine("[{0}] [{1}] Done: {2}% Time: {3}", _map.Id, _name, newValue, _stopwatch.Elapsed);
+                
                 _previousValue = newValue;
             }
         }
 
         public void OnStatus(object sender, StatusEventArgs args)
         {
-            Console.WriteLine("[{0}] [{1}] status changed to '{2}'", _map.Id, _name, args.Status);
+            switch (args.Status)
+            {
+                case MapStatus.InProgress:
+                    _stopwatch.Start();
+                    Console.WriteLine("[{0}] [{1}] status changed to '{2}'", _map.Id, _name, args.Status);
+                    break;
+                
+                case MapStatus.Canceled:
+                case MapStatus.Failed:
+                case MapStatus.Succeeded:
+                    _stopwatch.Stop();
+                    Console.WriteLine("[{0}] [{1}] status changed to '{2}'. Process took: {3}", _map.Id, _name, args.Status, _stopwatch.Elapsed);
+                    break;
+
+                case MapStatus.Paused:
+                    _stopwatch.Stop();
+                    break;
+            }
         }
 
         public void Dispose()
