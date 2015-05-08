@@ -345,6 +345,7 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
         [TestCase(60000)]
         [TestCase(100000)]
         [Description("Just add so many items as it possible and calculate the speed.")]
+        [Explicit]
         public void PerformanceTest_Add(int count)
         {
             var repository = CreateRepository();
@@ -374,6 +375,7 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
         [TestCase(60000)]
         [TestCase(100000)]
         [Description("Just add so many items and calculate enumeration speed for all items.")]
+        [Explicit]
         public void PerformanceTest_All(int count)
         {
             var repository = CreateRepository();
@@ -408,6 +410,7 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
         [TestCase(10)]
         [TestCase(1)]
         [Description("Just add so many items and delete them all and calculate deletion speed for all items.")]
+        [Explicit]
         public void PerformanceTest_Delete(int count)
         {
             var repository = CreateRepository();
