@@ -34,5 +34,36 @@ namespace Shogun.Utility.Tests
             var parameter = new object();
             Validate.Null(parameter, null);
         }
+
+        [Test]
+        public void StringEmpty_StringIsNotEmpty_DoNothing()
+        {
+            var parameter = "Hello world";
+            Validate.StringEmpty(parameter, "parameter");
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void StringEmpty_StringIsNull_Throws()
+        {
+            string parameter = null;
+            Validate.StringEmpty(parameter, "parameter");
+        }
+        
+        [TestCase("")]
+        [TestCase("   ")]
+        [ExpectedException(typeof(ArgumentException))]
+        public void StringEmpty_StringIsEmpty_Throws(string input)
+        {
+            Validate.StringEmpty(input, "input");
+        }
+
+        [Test]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void StringEmpty_NameNotSpecified_Throws()
+        {
+            var parameter = "Hello world";
+            Validate.StringEmpty(parameter, null);
+        }
     }
 }

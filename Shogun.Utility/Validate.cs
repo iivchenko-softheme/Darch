@@ -31,5 +31,22 @@ namespace Shogun.Utility
                 throw new ArgumentNullException(parameterName);
             }
         }
+
+        /// <summary>
+        /// Throws if input string is Null, Empty or Whitespaces.
+        /// </summary>
+        /// <param name="input">String that is under validation.</param>
+        /// <param name="parameterName">Name of the <see cref="input"/> variable/parameter. Can't be NULL.</param>
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentException"/>
+        public static void StringEmpty(string input, string parameterName)
+        {
+            Null(input, parameterName);
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                throw new ArgumentException("String parameter can't be empty or whitespaces.", parameterName);
+            }
+        }
     }
 }
