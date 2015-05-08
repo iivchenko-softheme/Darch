@@ -71,7 +71,9 @@
     <Compile Include="Storages\MetadataItem.cs" />
     <Compile Include="Storages\Storage.cs" />
     <Compile Include="Utility\EventHandlerExtensions.cs" />
+    <Compile Include="Utility\LongExtensions.cs" />
     <Compile Include="Utility\Sequential.cs" />
+    <Compile Include="Utility\IntExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solutionitems\CodeAnalysisDictionary.xml" />

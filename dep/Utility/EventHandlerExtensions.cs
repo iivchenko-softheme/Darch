@@ -6,6 +6,7 @@
 
 using System;
 
+// TODO: Move to the Utility project
 namespace Deduplication.Utility
 {
     /// <summary>
@@ -20,7 +21,7 @@ namespace Deduplication.Utility
         /// <param name="eventHandler">Event to be raised.</param>
         /// <param name="sender">The raiser of the event.</param>
         /// <param name="args">Event args.</param>
-        public static void OnEvent<TEventArgs>(this EventHandler<TEventArgs> eventHandler, object sender, TEventArgs args)
+        public static void OnEvent<TEventArgs>(this EventHandler<TEventArgs> eventHandler, object sender, TEventArgs args) where TEventArgs : EventArgs
         {
             var handler = eventHandler;
 
