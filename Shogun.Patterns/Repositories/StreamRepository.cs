@@ -27,6 +27,8 @@ namespace Shogun.Patterns.Repositories
 
         // contains pair of item ID and item INDEX in the repository
         private readonly Lazy<IDictionary<ulong, long>> _cache;
+
+        private bool _disposed;
         
         /// <summary>
         /// Initializes a new instance of the StreamRepository class.
@@ -48,6 +50,7 @@ namespace Shogun.Patterns.Repositories
 
             // TODO: Think on smart cache that will work faster and which doesn't need to preload all elements at once.
             // TODO: the first item (or some firs bytes) should be an next id and validity flag
+            // TODO: implement feature with FREE IDs. When the cache will be full then it should compute all free available ids.
             _cache = new Lazy<IDictionary<ulong, long>>(() =>
                                                       {
                                                           var cache = new Dictionary<ulong, long>();
@@ -64,11 +67,17 @@ namespace Shogun.Patterns.Repositories
 
                                                           return cache;
                                                       });
+            _disposed = false;
         }
         
         public uint Count
         {
-            get { return (uint)_stream.Length / (uint)(IdSize + _itemSize); }
+            get
+            {
+                ThrowIfDisposed();
+
+                return (uint)_stream.Length / (uint)(IdSize + _itemSize);
+            }
         }
 
         // TODO: Make an IReadOnlyCollection or make it thread safe
@@ -76,12 +85,15 @@ namespace Shogun.Patterns.Repositories
         {
             get
             {
+                ThrowIfDisposed();
+
                 return _cache.Value.Keys.Select(id => new RepositoryItem<ulong, TItem>(id, ReadItem(GetItemIndex(id))));
             }
         }
 
         public TItem GetById(ulong id)
         {
+            ThrowIfDisposed();
             ThrowIfItemNotExists(id);
 
             return ReadItem(GetItemIndex(id));
@@ -89,6 +101,8 @@ namespace Shogun.Patterns.Repositories
 
         public ulong Add(TItem item)
         {
+            ThrowIfDisposed();
+
             Validate.Null(item, "item");
 
             var newId = _cache.Value.Count == 0 ? 1 : _cache.Value.Keys.Max() + 1;
@@ -103,6 +117,7 @@ namespace Shogun.Patterns.Repositories
 
         public void Delete(ulong id)
         {
+            ThrowIfDisposed();
             ThrowIfItemNotExists(id);
 
             var indexToDelete = _cache.Value[id];
@@ -129,6 +144,7 @@ namespace Shogun.Patterns.Repositories
 
         public void Update(ulong id, TItem item)
         {
+            ThrowIfDisposed();
             Validate.Null(item, "item");
 
             ThrowIfItemNotExists(id);
@@ -138,7 +154,11 @@ namespace Shogun.Patterns.Repositories
 
         public void Dispose()
         {
-            // TODO: !!! Implement
+            _stream.Dispose();
+            
+            _disposed = true;
+            
+            GC.SuppressFinalize(this);
         }
 
         private static void ValidateItem(int actualSize, int expectedSize)
@@ -238,6 +258,16 @@ namespace Shogun.Patterns.Repositories
         private long GetItemIndex(ulong id)
         {
             return _cache.Value[id] + IdSize;
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+            {
+                var msg = string.Format(CultureInfo.InvariantCulture, "{0} already disposed!", GetType().Name);
+
+                throw new ObjectDisposedException(msg);
+            }
         }
     }
 }

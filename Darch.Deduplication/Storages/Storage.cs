@@ -14,6 +14,7 @@ namespace Darch.Deduplication.Storages
 {
     // TODO: This will be the Reposiry so rename it after project migration.
     // TODO: add parameters validation.
+    // TODO: Googld info about when it is better to use struct than class. And may be use struct.
     public sealed class Storage : IStorage
     {
         private readonly IHash _hash;
