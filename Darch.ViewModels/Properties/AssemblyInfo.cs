@@ -10,11 +10,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("dep")]
+[assembly: AssemblyTitle("Darch.ViewModels")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("dep")]
+[assembly: AssemblyProduct("Darch.ViewModels")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -25,7 +25,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("15e839fb-3436-495e-83ba-6291e6accb4a")]
+[assembly: Guid("28c38f28-fef4-4145-bd0c-b29f1219ed12")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -37,14 +37,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("0.0.0.1")]
-[assembly: AssemblyFileVersion("0.0.0.1")]
-
-// TODO: Allow read and write buffer that equal 10 MB
-// TODO: Add write read producer consomer
-// TODO: Implement lock on a specific map. So there will no oportunity to open map in read and write and delete mode.
-// TODO: Add documentation to the interfaces
-// TODO: Add classes with implementations
-// TODO: Add integration tests
-// TODO: Add performance tests
-// TODO: Add to RepositoryLib CachedRepository. I need to increase performance of the dedup and to avoid excessive code
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

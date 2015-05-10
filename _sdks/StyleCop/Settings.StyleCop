@@ -12,6 +12,7 @@
       <Value>Int</Value>
       <Value>Unmount</Value>
       <Value>Unmounted</Value>
+      <Value>xaml</Value>
     </CollectionProperty>
   </GlobalSettings>
   <Parsers>

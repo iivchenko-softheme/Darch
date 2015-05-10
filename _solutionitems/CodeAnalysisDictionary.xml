@@ -4,6 +4,12 @@
     <Recognized>
       <Word>Darch</Word>
       <Word>Deduplication</Word>
+      <Word>GUI</Word>
     </Recognized>
   </Words>
+  <Acronyms>
+    <CasingExceptions>
+      <Acronym>GUI</Acronym>
+    </CasingExceptions>
+  </Acronyms>
 </Dictionary>

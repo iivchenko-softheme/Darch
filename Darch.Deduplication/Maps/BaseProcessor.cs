@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Darch.Deduplication.Storages;
 using Darch.Deduplication.Utility;
+using Shogun.Utility.Extensions;
 
 namespace Darch.Deduplication.Maps
 {

@@ -4,10 +4,10 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
+// TODO: Move to the Utility project
 using System;
 
-// TODO: Move to the Utility project
-namespace Darch.Deduplication.Utility
+namespace Shogun.Utility.Extensions
 {
     /// <summary>
     /// Provides a set of static (Shared in Visual Basic) methods for querying objects that implement <see cref="EventHandler{TEventArgs}"/>.

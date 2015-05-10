@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Darch.Deduplication</RootNamespace>
     <AssemblyName>Darch.Deduplication</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
     <TargetFrameworkProfile />
@@ -68,7 +68,6 @@
     <Compile Include="Storages\MD5Hash.cs" />
     <Compile Include="Storages\MetadataItem.cs" />
     <Compile Include="Storages\Storage.cs" />
-    <Compile Include="Utility\EventHandlerExtensions.cs" />
     <Compile Include="Utility\LongExtensions.cs" />
     <Compile Include="Utility\Sequential.cs" />
     <Compile Include="Utility\IntExtensions.cs" />
