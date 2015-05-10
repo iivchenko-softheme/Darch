@@ -23,6 +23,9 @@ namespace Shogun.Utility.Extensions
         /// <param name="action">A function to affect each element of the sequence.</param>
         public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
         {
+            Validate.Null(source, "source");
+            Validate.Null(action, "action");
+
             foreach (var item in source)
             {
                 action(item);
@@ -38,6 +41,9 @@ namespace Shogun.Utility.Extensions
         /// <returns>New sequence with processed elements.</returns>
         public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Func<T, T> action)
         {
+            Validate.Null(source, "source");
+            Validate.Null(action, "action");
+
             var collection = new Collection<T>();
 
             foreach (var item in source)
