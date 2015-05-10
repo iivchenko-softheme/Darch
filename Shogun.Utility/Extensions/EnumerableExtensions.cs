@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Shogun.Utility.Extensions
 {
@@ -26,6 +27,25 @@ namespace Shogun.Utility.Extensions
             {
                 action(item);
             }
+        }
+
+        /// <summary>
+        /// Apply an action for each element of the sequence and returns new processed sequence.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of <see cref="source"/>.</typeparam>
+        /// <param name="source">An <see cref="IEnumerable{T}"/> that contains the elements to apply the action to.</param>
+        /// <param name="action">A function to affect each element of the sequence. Returns new processed element.</param>
+        /// <returns>New sequence with processed elements.</returns>
+        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Func<T, T> action)
+        {
+            var collection = new Collection<T>();
+
+            foreach (var item in source)
+            {
+                collection.Add(action(item));
+            }
+
+            return collection;
         }
     }
 }
