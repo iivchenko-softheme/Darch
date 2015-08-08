@@ -31,7 +31,7 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
             {
                 Seed = (int)DateTime.Now.Ticks, 
                 Storage = Configurator.StorageType.MemoryStream,
-                LogLevel = LogLevel.Trace,
+                LogLevel = LogLevel.Info,
                 LogFlushPolicy = FlushPolicy.Buffered
             };
 
@@ -63,7 +63,7 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
         [Explicit]
         public void PerformanceTest_Add(int count)
         {
-            var repository = CreateRepository();
+            var repository = _configurator.CreateRepository();
             var logger = _configurator.CreateLogger();
             var stopwatch = new Stopwatch();
             var itemStopwatch = new Stopwatch();
@@ -100,14 +100,18 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
         [Explicit]
         public void PerformanceTest_All(int count)
         {
-            var repository = CreateRepository();
+            var repository = _configurator.CreateRepository();
+            var logger = _configurator.CreateLogger();
             var stopwatch = new Stopwatch();
 
+            stopwatch.Start();
             for (var i = 0; i < count; i++)
             {
                 repository.Add(CreateItem());
             }
-
+            
+            logger.Info(string.Format("Generating repo took: {0}", stopwatch.Elapsed));
+            stopwatch.Reset();
             stopwatch.Start();
 
             foreach (var item in repository.All)
@@ -117,7 +121,7 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
 
             stopwatch.Stop();
 
-            Console.WriteLine("Enumeration of all ({0}) elements took {1}.", count, stopwatch.Elapsed);
+            logger.Info(string.Format("Enumeration of all ({0}) elements took {1}.", count, stopwatch.Elapsed));
         }
 
         [TestCase(100000)]
@@ -135,15 +139,21 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
         [Explicit]
         public void PerformanceTest_Delete(int count)
         {
-            var repository = CreateRepository();
+            var repository = _configurator.CreateRepository();
             var ids = new List<ulong>();
+            var logger = _configurator.CreateLogger();
             var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
 
             for (var i = 0; i < count; i++)
             {
                 ids.Add(repository.Add(CreateItem()));
             }
-
+            
+            logger.Info(string.Format("Generating repo took: {0}", stopwatch.Elapsed));
+            
+            stopwatch.Reset();
             stopwatch.Start();
 
             foreach (var id in ids)
@@ -160,19 +170,6 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
 
         #region Help methods
         
-        private static StreamRepository<StreamRepositoryTestItem> CreateRepository(Stream stream)
-        {
-            return new StreamRepository<StreamRepositoryTestItem>(
-                stream,
-                new StreamRepositoryTestMapper(),
-                StreamRepositoryTestItem.ItemSize);
-        }
-
-        private StreamRepository<StreamRepositoryTestItem> CreateRepository()
-        {
-            return CreateRepository(_configurator.CreateStorage());
-        }
-
         private StreamRepositoryTestItem CreateItem()
         {
             var buffer = new byte[StreamRepositoryTestItem.TestStringSize];
@@ -193,6 +190,13 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
 
         private class Configurator
         {
+            private readonly IList<Tuple<string, Stream>> _storageFiles;
+
+            public Configurator()
+            {
+                _storageFiles = new List<Tuple<string, Stream>>();
+            }
+
             public enum StorageType
             {
                 MemoryStream,
@@ -221,9 +225,24 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
                 return msg.ToString();
             }
 
-            public Stream CreateStorage()
+            public StreamRepository<StreamRepositoryTestItem> CreateRepository()
             {
-                return new MemoryStream();
+                Stream stream;
+                if (Storage == StorageType.MemoryStream)
+                {
+                    stream = new MemoryStream();
+                }
+                else
+                {
+                    var path = Path.GetTempFileName();
+                    stream = File.Open(path, FileMode.Open);
+
+                    _storageFiles.Add(new Tuple<string, Stream>(path, stream));
+                }
+
+                return new StreamRepository<StreamRepositoryTestItem>(stream,
+                                                                      new StreamRepositoryTestMapper(),
+                                                                      StreamRepositoryTestItem.ItemSize);
             }
 
             public Logger CreateLogger()
@@ -233,6 +252,12 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
 
             public void Clear()
             {
+                foreach (var storageFile in _storageFiles)
+                {
+                    storageFile.Item2.Close();
+
+                    File.Delete(storageFile.Item1);
+                }
             }
         }
     }
