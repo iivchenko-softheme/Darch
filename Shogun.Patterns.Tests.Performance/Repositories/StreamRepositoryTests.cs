@@ -13,7 +13,6 @@ using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Shogun.Patterns.Repositories;
-using Shogun.Patterns.Tests.Integration.Repositories;
 using Shogun.Patterns.Tests.Performance.Utility.Logging;
 
 namespace Shogun.Patterns.Tests.Performance.Repositories
@@ -29,10 +28,11 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
         {
             _configurator = new Configurator
             {
-                Seed = (int)DateTime.Now.Ticks, 
-                Storage = Configurator.StorageType.MemoryStream,
+                Seed = (int)DateTime.Now.Ticks,
+                Storage = Configurator.StorageType.File,
                 LogLevel = LogLevel.Info,
-                LogFlushPolicy = FlushPolicy.Buffered
+                LogFlushPolicy = FlushPolicy.Buffered,
+                BlockSize = 8 * 1024 // 8 kb
             };
 
             Console.WriteLine(_configurator.ToString());
@@ -74,7 +74,7 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
             {
                 itemStopwatch.Reset();
                 itemStopwatch.Start();
-                repository.Add(CreateItem());
+                repository.Add(CreateItem(_configurator.BlockSize));
 
                 logger.Debug(string.Format("Add element {0}: took {1}", i, itemStopwatch.Elapsed));
             }
@@ -107,9 +107,9 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
             stopwatch.Start();
             for (var i = 0; i < count; i++)
             {
-                repository.Add(CreateItem());
+                repository.Add(CreateItem(_configurator.BlockSize));
             }
-            
+
             logger.Info(string.Format("Generating repo took: {0}", stopwatch.Elapsed));
             stopwatch.Reset();
             stopwatch.Start();
@@ -122,6 +122,7 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
             stopwatch.Stop();
 
             logger.Info(string.Format("Enumeration of all ({0}) elements took {1}.", count, stopwatch.Elapsed));
+            logger.Flush();
         }
 
         [TestCase(100000)]
@@ -148,11 +149,11 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
 
             for (var i = 0; i < count; i++)
             {
-                ids.Add(repository.Add(CreateItem()));
+                ids.Add(repository.Add(CreateItem(_configurator.BlockSize)));
             }
-            
+
             logger.Info(string.Format("Generating repo took: {0}", stopwatch.Elapsed));
-            
+
             stopwatch.Reset();
             stopwatch.Start();
 
@@ -163,38 +164,74 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
 
             stopwatch.Stop();
 
-            Console.WriteLine("Deletion of all ({0}) elements took {1}.", count, stopwatch.Elapsed);
+            logger.Info(string.Format("Deletion of all ({0}) elements took {1}.", count, stopwatch.Elapsed));
+            logger.Flush();
+        }
+
+        [TestCase(100000)]
+        [TestCase(60000)]
+        [TestCase(50000)]
+        [TestCase(40000)]
+        [TestCase(30000)]
+        [TestCase(20000)]
+        [TestCase(10000)]
+        [TestCase(1000)]
+        [TestCase(100)]
+        [TestCase(10)]
+        [TestCase(1)]
+        [Description("Just add so many items, close and reopen the repository and calculate reopen speed (mainly cache generation).")]
+        [Explicit]
+        public void PerformanceTest_ReopenRepository(int count)
+        {
+            var repository = _configurator.CreateRepository();
+            var ids = new List<ulong>();
+            var logger = _configurator.CreateLogger();
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+
+            for (var i = 0; i < count; i++)
+            {
+                ids.Add(repository.Add(CreateItem(_configurator.BlockSize)));
+            }
+
+            logger.Info(string.Format("Generating repo took: {0}", stopwatch.Elapsed));
+
+            stopwatch.Reset();
+            stopwatch.Start();
+
+            repository = _configurator.ReopenRepository(repository);
+
+            repository.GetById(1);
+
+            stopwatch.Stop();
+
+            logger.Info(string.Format("Reopen of the repository with ({0}) elements took {1}.", count, stopwatch.Elapsed));
+            logger.Flush();
         }
 
         #endregion
 
         #region Help methods
-        
-        private StreamRepositoryTestItem CreateItem()
+
+        private byte[] CreateItem(int size)
         {
-            var buffer = new byte[StreamRepositoryTestItem.TestStringSize];
+            var buffer = new byte[size];
 
             _random.NextBytes(buffer);
 
-            var str = new string(buffer.Select(x => (char)x).ToArray());
-
-            return new StreamRepositoryTestItem
-            {
-                TestString = str,
-                TestValue1 = _random.Next(),
-                TestValue2 = _random.Next()
-            };
+            return buffer;
         }
 
         #endregion
 
         private class Configurator
         {
-            private readonly IList<Tuple<string, Stream>> _storageFiles;
+            private readonly IList<Tuple<string, Stream, StreamRepository<byte[]>>> _storageFiles;
 
             public Configurator()
             {
-                _storageFiles = new List<Tuple<string, Stream>>();
+                _storageFiles = new List<Tuple<string, Stream, StreamRepository<byte[]>>>();
             }
 
             public enum StorageType
@@ -206,10 +243,12 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
             public int Seed { get; set; }
 
             public StorageType Storage { get; set; }
-            
+
             public LogLevel LogLevel { get; set; }
 
             public FlushPolicy LogFlushPolicy { get; set; }
+
+            public int BlockSize { get; set; }
 
             public override string ToString()
             {
@@ -220,29 +259,49 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
                     .AppendLine("Seed: " + Seed)
                     .AppendLine("Storage type: " + Storage)
                     .AppendLine("Logger Level: " + LogLevel)
-                    .AppendLine("Logger Flush policy: " + LogFlushPolicy);
+                    .AppendLine("Logger Flush policy: " + LogFlushPolicy)
+                    .AppendLine("Block size: " + BlockSize);
 
                 return msg.ToString();
             }
 
-            public StreamRepository<StreamRepositoryTestItem> CreateRepository()
+            public StreamRepository<byte[]> CreateRepository()
             {
                 Stream stream;
+                var path = string.Empty;
+
                 if (Storage == StorageType.MemoryStream)
                 {
                     stream = new MemoryStream();
                 }
                 else
                 {
-                    var path = Path.GetTempFileName();
+                    path = Path.GetTempFileName();
                     stream = File.Open(path, FileMode.Open);
-
-                    _storageFiles.Add(new Tuple<string, Stream>(path, stream));
                 }
 
-                return new StreamRepository<StreamRepositoryTestItem>(stream,
-                                                                      new StreamRepositoryTestMapper(),
-                                                                      StreamRepositoryTestItem.ItemSize);
+                var repo = new StreamRepository<byte[]>(stream,
+                                                    new DataStreamMapper(BlockSize),
+                                                    BlockSize);
+
+                _storageFiles.Add(new Tuple<string, Stream, StreamRepository<byte[]>>(path, stream, repo));
+
+                return repo;
+            }
+
+            public StreamRepository<byte[]> ReopenRepository(StreamRepository<byte[]> repository)
+            {
+                var item = _storageFiles.Single(x => x.Item3 == repository);
+                
+                _storageFiles.Remove(item);
+
+                var repo = new StreamRepository<byte[]>(item.Item2,
+                                                    new DataStreamMapper(BlockSize),
+                                                    BlockSize);
+
+                _storageFiles.Add(new Tuple<string, Stream, StreamRepository<byte[]>>(item.Item1, item.Item2, repo));
+
+                return repo;
             }
 
             public Logger CreateLogger()
@@ -256,7 +315,10 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
                 {
                     storageFile.Item2.Close();
 
-                    File.Delete(storageFile.Item1);
+                    if (!string.IsNullOrWhiteSpace(storageFile.Item1))
+                    {
+                        File.Delete(storageFile.Item1);
+                    }
                 }
             }
         }

@@ -48,8 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\StreamRepositoryTestItem.cs" />
-    <Compile Include="Repositories\StreamRepositoryTestMapper.cs" />
+    <Compile Include="Repositories\DataStreamMapper.cs" />
     <Compile Include="Repositories\StreamRepositoryTests.cs" />
     <Compile Include="Utility\Logging\FlushPolicy.cs" />
     <Compile Include="Utility\Logging\Logger.cs" />
