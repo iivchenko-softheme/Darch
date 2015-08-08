@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 using Shogun.Patterns.Repositories;
 
@@ -31,6 +32,12 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
             Console.WriteLine("Seed: {0}", seed);
 
             _random = new Random(seed);
+        }
+
+        [Test]
+        public void Test()
+        {
+            Console.WriteLine(Assembly.GetExecutingAssembly().Location);
         }
 
         #region Functionality tests
@@ -440,7 +447,8 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
 
         private static StreamRepository<StreamRepositoryTestItem> CreateRepository()
         {
-            return CreateRepository(new MemoryStream());
+            File.Create(Path.GetTempFileName());
+            return CreateRepository();
         }
 
         private static StreamRepository<StreamRepositoryTestItem> CreateRepository(Stream stream)
@@ -466,6 +474,11 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
                 TestValue2 = _random.Next()
             };
         }
+
+        ////private string GetBinaryPath()
+        ////{
+        ////    Assembly.GetExecutingAssembly().Location
+        ////}
 
         #endregion
     }

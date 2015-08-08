@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Darch.ViewModels", "Darch.V
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Darch.Gui.Wpf", "Darch.Gui.Wpf\Darch.Gui.Wpf.csproj", "{E3D4034A-2BF7-4078-9921-0DC21F35CB85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shogun.Patterns.Tests.Performance", "Shogun.Patterns.Tests.Performance\Shogun.Patterns.Tests.Performance.csproj", "{A6AAB8E2-BE03-41BB-9060-5AE794D3EBF5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{E3D4034A-2BF7-4078-9921-0DC21F35CB85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3D4034A-2BF7-4078-9921-0DC21F35CB85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3D4034A-2BF7-4078-9921-0DC21F35CB85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6AAB8E2-BE03-41BB-9060-5AE794D3EBF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6AAB8E2-BE03-41BB-9060-5AE794D3EBF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6AAB8E2-BE03-41BB-9060-5AE794D3EBF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6AAB8E2-BE03-41BB-9060-5AE794D3EBF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,5 +74,6 @@ Global
 		{2544E730-2347-4C93-A348-D91E9A97AC86} = {58CE6DCD-0B3F-4A28-A724-92C5F5A3D3BF}
 		{5E917F1A-7E3F-45E8-822F-D12EF6D9045D} = {58CE6DCD-0B3F-4A28-A724-92C5F5A3D3BF}
 		{A6E2799E-4888-40F1-A304-56339DAB1573} = {58CE6DCD-0B3F-4A28-A724-92C5F5A3D3BF}
+		{A6AAB8E2-BE03-41BB-9060-5AE794D3EBF5} = {58CE6DCD-0B3F-4A28-A724-92C5F5A3D3BF}
 	EndGlobalSection
 EndGlobal
