@@ -51,6 +51,9 @@
     <Compile Include="Repositories\StreamRepositoryTestItem.cs" />
     <Compile Include="Repositories\StreamRepositoryTestMapper.cs" />
     <Compile Include="Repositories\StreamRepositoryTests.cs" />
+    <Compile Include="Utility\Logging\FlushPolicy.cs" />
+    <Compile Include="Utility\Logging\Logger.cs" />
+    <Compile Include="Utility\Logging\LogLevel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shogun.Patterns\Shogun.Patterns.csproj">
@@ -58,6 +61,7 @@
       <Name>Shogun.Patterns</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\_sdks\StyleCop\StyleCop.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

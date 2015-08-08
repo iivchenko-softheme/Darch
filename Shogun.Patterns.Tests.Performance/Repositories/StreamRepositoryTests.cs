@@ -10,25 +10,40 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using NUnit.Framework;
 using Shogun.Patterns.Repositories;
 using Shogun.Patterns.Tests.Integration.Repositories;
+using Shogun.Patterns.Tests.Performance.Utility.Logging;
 
 namespace Shogun.Patterns.Tests.Performance.Repositories
 {
     [TestFixture]
     public class StreamRepositoryTests
     {
+        private Configurator _configurator;
         private Random _random;
 
         [TestFixtureSetUp]
         public void Initialize()
         {
-            var seed = (int)DateTime.Now.Ticks;
+            _configurator = new Configurator
+            {
+                Seed = (int)DateTime.Now.Ticks, 
+                Storage = Configurator.StorageType.MemoryStream,
+                LogLevel = LogLevel.Trace,
+                LogFlushPolicy = FlushPolicy.Buffered
+            };
 
-            Console.WriteLine("Seed: {0}", seed);
+            Console.WriteLine(_configurator.ToString());
 
-            _random = new Random(seed);
+            _random = new Random(_configurator.Seed);
+        }
+
+        [TestFixtureTearDown]
+        public void FixtureTeardown()
+        {
+            _configurator.Clear();
         }
 
         #region Performance tests
@@ -49,18 +64,25 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
         public void PerformanceTest_Add(int count)
         {
             var repository = CreateRepository();
+            var logger = _configurator.CreateLogger();
             var stopwatch = new Stopwatch();
+            var itemStopwatch = new Stopwatch();
 
             stopwatch.Start();
 
             for (var i = 0; i < count; i++)
             {
+                itemStopwatch.Reset();
+                itemStopwatch.Start();
                 repository.Add(CreateItem());
+
+                logger.Debug(string.Format("Add element {0}: took {1}", i, itemStopwatch.Elapsed));
             }
 
             stopwatch.Stop();
 
-            Console.WriteLine("Add of {0} elements took {1}.", count, stopwatch.Elapsed);
+            logger.Info(string.Format("Add of {0} elements took {1}.", count, stopwatch.Elapsed));
+            logger.Flush();
         }
 
         [TestCase(1)]
@@ -137,18 +159,18 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
         #endregion
 
         #region Help methods
-
-        private static StreamRepository<StreamRepositoryTestItem> CreateRepository()
-        {
-            return CreateRepository(new MemoryStream());
-        }
-
+        
         private static StreamRepository<StreamRepositoryTestItem> CreateRepository(Stream stream)
         {
             return new StreamRepository<StreamRepositoryTestItem>(
                 stream,
                 new StreamRepositoryTestMapper(),
                 StreamRepositoryTestItem.ItemSize);
+        }
+
+        private StreamRepository<StreamRepositoryTestItem> CreateRepository()
+        {
+            return CreateRepository(_configurator.CreateStorage());
         }
 
         private StreamRepositoryTestItem CreateItem()
@@ -168,5 +190,50 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
         }
 
         #endregion
+
+        private class Configurator
+        {
+            public enum StorageType
+            {
+                MemoryStream,
+                File
+            }
+
+            public int Seed { get; set; }
+
+            public StorageType Storage { get; set; }
+            
+            public LogLevel LogLevel { get; set; }
+
+            public FlushPolicy LogFlushPolicy { get; set; }
+
+            public override string ToString()
+            {
+                var msg = new StringBuilder();
+
+                msg
+                    .AppendLine("=== Test Fixture Configuration ===")
+                    .AppendLine("Seed: " + Seed)
+                    .AppendLine("Storage type: " + Storage)
+                    .AppendLine("Logger Level: " + LogLevel)
+                    .AppendLine("Logger Flush policy: " + LogFlushPolicy);
+
+                return msg.ToString();
+            }
+
+            public Stream CreateStorage()
+            {
+                return new MemoryStream();
+            }
+
+            public Logger CreateLogger()
+            {
+                return new Logger(LogLevel, LogFlushPolicy);
+            }
+
+            public void Clear()
+            {
+            }
+        }
     }
 }
