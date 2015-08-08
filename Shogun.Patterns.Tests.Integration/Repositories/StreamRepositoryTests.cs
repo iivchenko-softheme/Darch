@@ -34,12 +34,6 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
             _random = new Random(seed);
         }
 
-        [Test]
-        public void Test()
-        {
-            Console.WriteLine(Assembly.GetExecutingAssembly().Location);
-        }
-
         #region Functionality tests
       
         [Test]
@@ -338,117 +332,11 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
         // delete not existing item
         #endregion
 
-        #region Performance tests
-
-        [TestCase(1)]
-        [TestCase(10)]
-        [TestCase(100)]
-        [TestCase(1000)]
-        [TestCase(10000)]
-        [TestCase(20000)]
-        [TestCase(30000)]
-        [TestCase(40000)]
-        [TestCase(50000)]
-        [TestCase(60000)]
-        [TestCase(100000)]
-        [Description("Just add so many items as it possible and calculate the speed.")]
-        [Explicit]
-        public void PerformanceTest_Add(int count)
-        {
-            var repository = CreateRepository();
-            var stopwatch = new Stopwatch();
-
-            stopwatch.Start();
-
-            for (var i = 0; i < count; i++)
-            {
-                repository.Add(CreateItem());
-            }
-
-            stopwatch.Stop();
-
-            Console.WriteLine("Add of {0} elements took {1}.", count, stopwatch.Elapsed);
-        }
-
-        [TestCase(1)]
-        [TestCase(10)]
-        [TestCase(100)]
-        [TestCase(1000)]
-        [TestCase(10000)]
-        [TestCase(20000)]
-        [TestCase(30000)]
-        [TestCase(40000)]
-        [TestCase(50000)]
-        [TestCase(60000)]
-        [TestCase(100000)]
-        [Description("Just add so many items and calculate enumeration speed for all items.")]
-        [Explicit]
-        public void PerformanceTest_All(int count)
-        {
-            var repository = CreateRepository();
-            var stopwatch = new Stopwatch();
-
-            for (var i = 0; i < count; i++)
-            {
-                repository.Add(CreateItem());
-            }
-
-            stopwatch.Start();
-
-            foreach (var item in repository.All)
-            {
-                item.Id.ToString(CultureInfo.InvariantCulture);
-            }
-
-            stopwatch.Stop();
-
-            Console.WriteLine("Enumeration of all ({0}) elements took {1}.", count, stopwatch.Elapsed);
-        }
-
-        [TestCase(100000)]
-        [TestCase(60000)]
-        [TestCase(50000)]
-        [TestCase(40000)]
-        [TestCase(30000)]        
-        [TestCase(20000)]
-        [TestCase(10000)]
-        [TestCase(1000)]
-        [TestCase(100)]
-        [TestCase(10)]
-        [TestCase(1)]
-        [Description("Just add so many items and delete them all and calculate deletion speed for all items.")]
-        [Explicit]
-        public void PerformanceTest_Delete(int count)
-        {
-            var repository = CreateRepository();
-            var ids = new List<ulong>();
-            var stopwatch = new Stopwatch();
-
-            for (var i = 0; i < count; i++)
-            {
-                ids.Add(repository.Add(CreateItem()));
-            }
-
-            stopwatch.Start();
-
-            foreach (var id in ids)
-            {
-                repository.Delete(id);
-            }
-
-            stopwatch.Stop();
-
-            Console.WriteLine("Deletion of all ({0}) elements took {1}.", count, stopwatch.Elapsed);
-        }
-
-        #endregion
-
         #region Help methods
 
         private static StreamRepository<StreamRepositoryTestItem> CreateRepository()
         {
-            File.Create(Path.GetTempFileName());
-            return CreateRepository();
+            return CreateRepository(new MemoryStream());
         }
 
         private static StreamRepository<StreamRepositoryTestItem> CreateRepository(Stream stream)
@@ -474,11 +362,6 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
                 TestValue2 = _random.Next()
             };
         }
-
-        ////private string GetBinaryPath()
-        ////{
-        ////    Assembly.GetExecutingAssembly().Location
-        ////}
 
         #endregion
     }
