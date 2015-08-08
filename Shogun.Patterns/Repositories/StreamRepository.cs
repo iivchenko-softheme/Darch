@@ -26,7 +26,7 @@ namespace Shogun.Patterns.Repositories
         private readonly int _itemSize;
 
         // contains pair of item ID and item INDEX in the repository
-        private readonly Lazy<IDictionary<ulong, long>> _cache;
+        private readonly IDictionary<ulong, long> _cache;
 
         private bool _disposed;
         
@@ -51,22 +51,15 @@ namespace Shogun.Patterns.Repositories
             // TODO: Think on smart cache that will work faster and which doesn't need to preload all elements at once.
             // TODO: the first item (or some firs bytes) should be an next id and validity flag
             // TODO: implement feature with FREE IDs. When the cache will be full then it should compute all free available ids.
-            _cache = new Lazy<IDictionary<ulong, long>>(() =>
-                                                      {
-                                                          var cache = new Dictionary<ulong, long>();
-                                                          long index = 0;
+            _cache = new Dictionary<ulong, long>();
 
-                                                          while (index < _stream.Length)
-                                                          {
-                                                              var id = ReadId(index);
+            for (long index = 0; index < _stream.Length; index += IdSize + _itemSize)
+            {
+                var id = ReadId(index);
 
-                                                              cache.Add(id, index);
+                _cache.Add(id, index);
+            }
 
-                                                              index += IdSize + _itemSize;
-                                                          }
-
-                                                          return cache;
-                                                      });
             _disposed = false;
         }
         
@@ -87,7 +80,7 @@ namespace Shogun.Patterns.Repositories
             {
                 ThrowIfDisposed();
 
-                return _cache.Value.Keys.Select(id => new RepositoryItem<ulong, TItem>(id, ReadItem(GetItemIndex(id))));
+                return _cache.Keys.Select(id => new RepositoryItem<ulong, TItem>(id, ReadItem(GetItemIndex(id))));
             }
         }
 
@@ -105,12 +98,12 @@ namespace Shogun.Patterns.Repositories
 
             Validate.Null(item, "item");
 
-            var newId = _cache.Value.Count == 0 ? 1 : _cache.Value.Keys.Max() + 1;
+            var newId = _cache.Count == 0 ? 1 : _cache.Keys.Max() + 1;
             var newIndex = _stream.Length;
 
             WriteIdAndItem(newIndex, newId, item);
 
-            _cache.Value.Add(newId, newIndex);
+            _cache.Add(newId, newIndex);
 
             return newId;
         }
@@ -120,10 +113,10 @@ namespace Shogun.Patterns.Repositories
             ThrowIfDisposed();
             ThrowIfItemNotExists(id);
 
-            var indexToDelete = _cache.Value[id];
+            var indexToDelete = _cache[id];
             var indexToMove = _stream.Length - (IdSize + _itemSize); // Take last item in the repository
 
-            _cache.Value.Remove(id);
+            _cache.Remove(id);
 
             // In case if we delete the only one element or last element
             if (indexToDelete == indexToMove)
@@ -137,7 +130,7 @@ namespace Shogun.Patterns.Repositories
 
             WriteIdAndItem(indexToDelete, idToMove, itemToMove); // Replace item we want to delete with last repository item.
 
-            _cache.Value[idToMove] = indexToDelete;
+            _cache[idToMove] = indexToDelete;
 
             _stream.SetLength(_stream.Length - (IdSize + _itemSize));
         }
@@ -177,7 +170,7 @@ namespace Shogun.Patterns.Repositories
 
         private void ThrowIfItemNotExists(ulong id)
         {
-            if (!_cache.Value.ContainsKey(id))
+            if (!_cache.ContainsKey(id))
             {
                 var msg = string.Format(
                     CultureInfo.InvariantCulture, 
@@ -257,7 +250,7 @@ namespace Shogun.Patterns.Repositories
 
         private long GetItemIndex(ulong id)
         {
-            return _cache.Value[id] + IdSize;
+            return _cache[id] + IdSize;
         }
 
         private void ThrowIfDisposed()
