@@ -69,7 +69,7 @@ namespace Shogun.Patterns.Repositories
             {
                 ThrowIfDisposed();
 
-                return (uint)_stream.Length / (uint)(IdSize + _itemSize);
+                return (uint)_cache.Count;
             }
         }
 
