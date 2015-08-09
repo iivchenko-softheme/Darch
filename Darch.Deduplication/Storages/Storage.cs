@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Darch.Deduplication.Utility;
 using Shogun.Patterns.Repositories;
@@ -39,14 +40,27 @@ namespace Darch.Deduplication.Storages
             _metadataRepository = metadataRepository;
             _dataRepository = dataRepository;
 
-            _metadataCache = new Lazy<IDictionary<byte[], ulong>>(() => _metadataRepository.All.ToDictionary(key => key.Item.Checksum, value => value.Id, new ByteArrayEquityComparer()));
+            _metadataCache = new Lazy<IDictionary<byte[], ulong>>(() =>
+            {
+                var dictionary = new Dictionary<byte[], ulong>(new ByteArrayEquityComparer());
+
+                foreach (var id in _metadataRepository.Ids)
+                {
+                    var item = _metadataRepository.GetById(id);
+
+                    dictionary.Add(item.Checksum, id);
+                }
+
+                return dictionary;
+            });
+
             _lock = new object();
 
             _disposed = false;
         }
 
         // TODO: Change to IReadOnlyCollection
-        public IEnumerable<ulong> MapIds 
+        public IEnumerable<ulong> MapIds
         {
             get
             {
@@ -54,8 +68,8 @@ namespace Darch.Deduplication.Storages
                 {
                     // TODO: Chek on locable if several threads are working
                     return _mapRepository
-                        .All
-                        .Select(x => x.Item.MapId)
+                        .Ids
+                        .Select(x => _mapRepository.GetById(x).MapId)
                         .Distinct()
                         .ToList();
                 }
@@ -68,11 +82,13 @@ namespace Darch.Deduplication.Storages
         {
             lock (_lock)
             {
-                return _mapRepository
-                    .All
-                    .Where(x => x.Item.MapId == mapId)
-                    .Select(x => x.Item.RecordIndex)
-                    .ToList();
+                return
+                    _mapRepository
+                        .Ids
+                        .Select(x => _mapRepository.GetById(x))
+                        .Where(x => x.MapId == mapId)
+                        .Select(x => x.RecordIndex)
+                        .ToList();
             }
         }
 
@@ -83,7 +99,7 @@ namespace Darch.Deduplication.Storages
             {
                 var hash = _hash.Calculate(block);
                 ulong metadataId;
-                
+
                 if (_metadataCache.Value.TryGetValue(hash, out metadataId))
                 {
                     var item = _metadataRepository.GetById(metadataId);
@@ -111,11 +127,17 @@ namespace Darch.Deduplication.Storages
 
                 ulong index = 0;
 
-                var indexes = _mapRepository.All.Where(x => x.Item.MapId == mapId).ToList();
+                var indexes =
+                    _mapRepository
+                        .Ids
+                        .Select(x => _mapRepository.GetById(x))
+                        .Where(x => x.MapId == mapId)
+                        .Select(x => x.RecordIndex)
+                        .ToList();
 
                 if (indexes.Any())
                 {
-                    index = indexes.Max(x => x.Item.RecordIndex) + 1;
+                    index = indexes.Max() + 1;
                 }
 
                 var mapRecordItem = new MapRecord(mapId, metadataId, index);
@@ -129,7 +151,13 @@ namespace Darch.Deduplication.Storages
         {
             lock (_lock)
             {
-                var metadataId = _mapRepository.All.Single(x => x.Item.MapId == mapId && x.Item.RecordIndex == blockIndex).Item.BlockId;
+                var metadataId =
+                    _mapRepository
+                        .Ids
+                        .Select(x => _mapRepository.GetById(x))
+                        .Single(x => x.MapId == mapId && x.RecordIndex == blockIndex)
+                        .BlockId;
+
                 var metadataItem = _metadataRepository.GetById(metadataId);
                 var dataItem = _dataRepository.GetById(metadataItem.DataId);
 
@@ -143,8 +171,21 @@ namespace Darch.Deduplication.Storages
             lock (_lock)
             {
                 // TODO: Check if input exists
-                var mapRecord = _mapRepository.All.Single(x => x.Item.MapId == mapId && x.Item.RecordIndex == blockIndex);
-                var metadataId = mapRecord.Item.BlockId;
+                ulong id = 0;
+                ulong blockId = 0;
+
+                foreach (var recordId in _mapRepository.Ids)
+                {
+                    var item = _mapRepository.GetById(recordId);
+
+                    if (item.MapId == mapId && item.RecordIndex == blockIndex)
+                    {
+                        id = recordId;
+                        blockId = item.BlockId;
+                    }
+                }
+
+                var metadataId = blockId;
                 var metadataItem = _metadataRepository.GetById(metadataId);
 
                 if (metadataItem.References > 1)
@@ -158,15 +199,15 @@ namespace Darch.Deduplication.Storages
                     _metadataRepository.Delete(metadataId);
                     _dataRepository.Delete(metadataItem.DataId);
                 }
-
-                _mapRepository.Delete(mapRecord.Id);
+                
+                _mapRepository.Delete(id);
             }
         }
 
         public void Dispose()
         {
             Dispose(true);
-            
+
             _disposed = true;
 
             GC.SuppressFinalize(this);

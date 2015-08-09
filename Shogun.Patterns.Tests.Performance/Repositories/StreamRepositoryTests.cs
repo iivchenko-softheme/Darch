@@ -96,9 +96,9 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
         [TestCase(50000)]
         [TestCase(60000)]
         [TestCase(100000)]
-        [Description("Just add so many items and calculate enumeration speed for all items.")]
+        [Description("Just add so many items and calculate enumeration speed for all items ids.")]
         [Explicit]
-        public void PerformanceTest_All(int count)
+        public void PerformanceTest_Ids(int count)
         {
             var repository = _configurator.CreateRepository();
             var logger = _configurator.CreateLogger();
@@ -114,10 +114,7 @@ namespace Shogun.Patterns.Tests.Performance.Repositories
             stopwatch.Reset();
             stopwatch.Start();
 
-            foreach (var item in repository.All)
-            {
-                item.Id.ToString(CultureInfo.InvariantCulture);
-            }
+            repository.Ids.ToList();
 
             stopwatch.Stop();
 

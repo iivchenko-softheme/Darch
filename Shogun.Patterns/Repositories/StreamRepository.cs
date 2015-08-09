@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -73,14 +74,13 @@ namespace Shogun.Patterns.Repositories
             }
         }
 
-        // TODO: Make an IReadOnlyCollection or make it thread safe
-        public IEnumerable<RepositoryItem<ulong, TItem>> All
+        public IReadOnlyCollection<ulong> Ids
         {
             get
             {
                 ThrowIfDisposed();
 
-                return _cache.Keys.Select(id => new RepositoryItem<ulong, TItem>(id, ReadItem(GetItemIndex(id))));
+                return new ReadOnlyCollection<ulong>(_cache.Keys.ToList());
             }
         }
 

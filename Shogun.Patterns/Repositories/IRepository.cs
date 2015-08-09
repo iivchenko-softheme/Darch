@@ -20,11 +20,11 @@ namespace Shogun.Patterns.Repositories
         /// Gets number of items in the storage.
         /// </summary>
         uint Count { get; }
-        
+
         /// <summary>
-        /// Gets enumerator to enumerate each item of the storage.
+        /// Gets ids of all registered items.
         /// </summary>
-        IEnumerable<RepositoryItem<TId, TItem>> All { get; }
+        IReadOnlyCollection<TId> Ids { get; }
 
         /// <summary>
         /// Returns an item by its identifier.

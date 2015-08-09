@@ -76,7 +76,7 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
 
         [Test]
         [Description("Add specific amount of items. Enumerate All repository items and check that they are equals.")]
-        public void AddAll_Test()
+        public void AddIds_Test()
         {
             var repository = CreateRepository();
             var items = new List<RepositoryItem<ulong, StreamRepositoryTestItem>>();
@@ -91,10 +91,10 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
             }
 
             // Check if items are same in the repo and in the list
-            foreach (var item in repository.All)
+            foreach (var id in repository.Ids)
             {
-                var expected = items.Single(x => x.Id == item.Id).Item;
-                var actual = item.Item;
+                var expected = items.Single(x => x.Id == id).Item;
+                var actual = repository.GetById(id);
 
                 Assert.AreEqual(expected, actual);
             }
@@ -127,10 +127,10 @@ namespace Shogun.Patterns.Tests.Integration.Repositories
             }
 
             // Check if items are same in the repo and in the list
-            foreach (var item in repository.All)
+            foreach (var id in repository.Ids)
             {
-                var expected = items.Single(x => x.Id == item.Id).Item;
-                var actual = item.Item;
+                var expected = items.Single(x => x.Id == id).Item;
+                var actual = repository.GetById(id);
 
                 Assert.AreEqual(expected, actual);
             }
