@@ -5,15 +5,16 @@
 // <email>iivchenko@live.com</email>
 
 using System.IO;
+using Shogun.Utility.Jobs;
 
 namespace Darch.Deduplication.Maps
 {
     public interface IMapProcessorFactory
     {
-        IMapProcessor CreateReadProcessor(ulong mapId, Stream target);
+        IJob CreateReadProcessor(ulong mapId, Stream target);
 
-        IMapProcessor CreateWriteProcessor(ulong mapId, int blockSize, Stream source);
+        IJob CreateWriteProcessor(ulong mapId, int blockSize, Stream source);
 
-        IMapProcessor CreateDeleteProcessor(ulong mapId);
+        IJob CreateDeleteProcessor(ulong mapId);
     }
 }

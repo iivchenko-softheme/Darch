@@ -12,7 +12,7 @@ using System.IO.Packaging;
 using System.Linq;
 using System.Xml.Serialization;
 using Darch.Deduplication;
-using Darch.Deduplication.Maps;
+using Shogun.Utility.Jobs;
 
 // TODO: Make thread safe in the future.
 namespace Darch.ViewModels.Archiving
@@ -39,7 +39,7 @@ namespace Darch.ViewModels.Archiving
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1309:UseOrdinalStringComparison", MessageId = "System.String.Equals(System.String,System.StringComparison)", Justification = "Some where in the future fix this.")]
-        public IMapProcessor Add(string path)
+        public IJob Add(string path)
         {
             var file = new FileInfo(path);
 
@@ -53,7 +53,7 @@ namespace Darch.ViewModels.Archiving
             
             writer.StatusChanged += (sender, args) =>
             {
-                if (args.Status == MapStatus.Succeeded)
+                if (args.Status == JobStatus.Succeeded)
                 {
                     stream.Close();
 
@@ -75,7 +75,7 @@ namespace Darch.ViewModels.Archiving
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1309:UseOrdinalStringComparison", MessageId = "System.String.Equals(System.String,System.StringComparison)", Justification = "Fix in the future!")]
-        public IMapProcessor Remove(string name)
+        public IJob Remove(string name)
         {
             var file = GetFiles().FirstOrDefault(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
             if (file == null)
@@ -87,7 +87,7 @@ namespace Darch.ViewModels.Archiving
 
             remover.StatusChanged += (sender, args) =>
             {
-                if (args.Status == MapStatus.Succeeded)
+                if (args.Status == JobStatus.Succeeded)
                 {
                     var files = GetFiles();
 
@@ -101,7 +101,7 @@ namespace Darch.ViewModels.Archiving
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1309:UseOrdinalStringComparison", MessageId = "System.String.Equals(System.String,System.StringComparison)", Justification = "Delete in the future.!")]
-        public IMapProcessor Extract(string name)
+        public IJob Extract(string name)
         {
             var file = GetFiles().FirstOrDefault(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
             if (file == null)
@@ -114,7 +114,7 @@ namespace Darch.ViewModels.Archiving
 
             extractor.StatusChanged += (sender, args) =>
             {
-                if (args.Status == MapStatus.Succeeded)
+                if (args.Status == JobStatus.Succeeded)
                 {
                     stream.Close();
                 }

@@ -54,6 +54,7 @@
     <Compile Include="Archiving\DataStreamMapper.cs" />
     <Compile Include="Archiving\IArchive.cs" />
     <Compile Include="Archiving\IArchiveProvider.cs" />
+    <Compile Include="Archiving\MapProvider.cs" />
     <Compile Include="Archiving\MapStreamMapper.cs" />
     <Compile Include="Archiving\MetadataStreamMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

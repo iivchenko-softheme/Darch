@@ -6,58 +6,55 @@
 
 using System;
 
-namespace Darch.Deduplication.Maps
+namespace Shogun.Utility.Jobs
 {
     /// <summary>
-    /// Provides functionality to monitor data handling process 
-    /// like adding data to a repository 
-    /// or reading data from the repository
-    /// or deleting data form the repository.
+    /// Provides functionality to implement some process handler and monitor.
     /// </summary>
-    public interface IMapProcessor : IDisposable
+    public interface IJob : IDisposable
     {
         /// <summary>
-        /// Raises when <see cref="IMapProcessor"/> <see cref="Status"/> has been changed.
+        /// Raises when the <see cref="Status"/> of the <see cref="IJob"/> has been changed.
         /// </summary>
         event EventHandler<StatusEventArgs> StatusChanged;
 
         /// <summary>
-        /// Raises when <see cref="IMapProcessor"/> <see cref="Progress"/> has been changed.
+        /// Raises when the <see cref="Progress"/> of the <see cref="IJob"/> has been changed.
         /// </summary>
         event EventHandler<ProgressEventArgs> ProgressChanged;
 
         /// <summary>
-        /// Gets the identifier of the map that logically combines piece of data.
+        /// Gets the identifier of the <see cref="IJob"/>.
         /// </summary>
         ulong Id { get; }
         
         /// <summary>
-        /// Gets the data handling status.
+        /// Gets the <see cref="IJob"/> status.
         /// </summary>
-        MapStatus Status { get; } 
+        JobStatus Status { get; } 
 
         /// <summary>
-        /// Gets the data handling progress.
+        /// Gets the <see cref="IJob"/> progress.
         /// </summary>
         Progress Progress { get; } 
         
         /// <summary>
-        /// Begins or continues data handling process.
+        /// Begins or continues <see cref="IJob"/> execution.
         /// </summary>
         void Start();
 
         /// <summary>
-        /// Cancels data handling process.
+        /// Cancels <see cref="IJob"/> execution.
         /// </summary>
         void Cancel();
 
         /// <summary>
-        /// Pauses data handling process.
+        /// Pauses <see cref="IJob"/> execution.
         /// </summary>
         void Pause();
 
         /// <summary>
-        /// Waits for the <see cref="IMapProcessor"/> to complete data handling process.
+        /// Waits for the <see cref="IJob"/> to complete execution.
         /// </summary>
         void Wait();
     }

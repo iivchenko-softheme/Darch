@@ -4,7 +4,6 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-// TODO: Move to the Utility project
 using System;
 
 namespace Shogun.Utility.Extensions

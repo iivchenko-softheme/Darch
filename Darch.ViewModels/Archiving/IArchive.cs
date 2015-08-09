@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using Darch.Deduplication.Maps;
+using Shogun.Utility.Jobs;
 
 namespace Darch.ViewModels.Archiving
 {
@@ -13,11 +14,11 @@ namespace Darch.ViewModels.Archiving
     {
         IEnumerable<ArchiveFile> Files { get; }
 
-        IMapProcessor Add(string path);
+        IJob Add(string path);
         
-        IMapProcessor Remove(string name);
+        IJob Remove(string name);
 
-        IMapProcessor Extract(string name);
+        IJob Extract(string name);
 
         void Flush();
 

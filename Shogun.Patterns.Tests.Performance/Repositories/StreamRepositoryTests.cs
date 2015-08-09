@@ -7,13 +7,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
 using Shogun.Patterns.Repositories;
-using Shogun.Patterns.Tests.Performance.Utility.Logging;
+using Shogun.Utility.Logging;
 
 namespace Shogun.Patterns.Tests.Performance.Repositories
 {

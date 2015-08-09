@@ -44,7 +44,4 @@ using System.Runtime.InteropServices;
 // TODO: Add write read producer consomer
 // TODO: Implement lock on a specific map. So there will no oportunity to open map in read and write and delete mode.
 // TODO: Add documentation to the interfaces
-// TODO: Add classes with implementations
-// TODO: Add integration tests
-// TODO: Add performance tests
 // TODO: Add to RepositoryLib CachedRepository. I need to increase performance of the dedup and to avoid excessive code

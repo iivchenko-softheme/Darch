@@ -47,8 +47,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Diagnostics\SpeedCounter.cs" />
+    <Compile Include="Diagnostics\SpeedStatistics.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\EventHandlerExtensions.cs" />
+    <Compile Include="Jobs\Job.cs" />
+    <Compile Include="Jobs\IJob.cs" />
+    <Compile Include="Jobs\JobStatus.cs" />
+    <Compile Include="Jobs\Progress.cs" />
+    <Compile Include="Jobs\ProgressEventArgs.cs" />
+    <Compile Include="Jobs\StatusEventArgs.cs" />
+    <Compile Include="Logging\FlushPolicy.cs" />
+    <Compile Include="Logging\Logger.cs" />
+    <Compile Include="Logging\LogLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Validate.cs" />
   </ItemGroup>

@@ -14,29 +14,15 @@ namespace Darch.Deduplication.Storages
         /// <summary>
         /// Initializes a new instance of the <see cref="MapRecord"/> class.
         /// </summary>
-        /// <param name="mapId">The identifier of the map.</param>
         /// <param name="blockId">The identifier of the block in the map.</param>
-        /// <param name="recordIndex">The index number of the block in the map.</param>
-        public MapRecord(ulong mapId, ulong blockId, ulong recordIndex)
+        public MapRecord(ulong blockId)
         {
-            MapId = mapId;
             BlockId = blockId;
-            RecordIndex = recordIndex;
         }
-
-        /// <summary>
-        /// Gets the identifier of the map.
-        /// </summary>
-        public ulong MapId { get; private set; }
 
         /// <summary>
         /// Gets the identifier of the block in the map.
         /// </summary>
         public ulong BlockId { get; private set; }
-
-        /// <summary>
-        /// Gets the index number of the block in the map record.
-        /// </summary>
-        public ulong RecordIndex { get; private set; }
     }
 }

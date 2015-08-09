@@ -7,10 +7,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
-using Darch.Deduplication.Maps;
 using Darch.Deduplication.Storages;
 using Darch.ViewModels.Archiving;
 using Darch.ViewModels.Utility;
+using Shogun.Utility.Jobs;
 
 namespace Darch.ViewModels.ViewModels
 {
@@ -19,7 +19,7 @@ namespace Darch.ViewModels.ViewModels
         private readonly IArchiveProvider _archiveProvider;
 
         private IArchive _archive;
-        private IMapProcessor _processor;
+        private IJob _processor;
 
         private ViewModelStatus _status;
         
@@ -204,7 +204,7 @@ namespace Darch.ViewModels.ViewModels
 
         private void OnCompleted(object sender, StatusEventArgs e)
         {
-            if (e.Status == MapStatus.Succeeded)
+            if (e.Status == JobStatus.Succeeded)
             {
                 _processor = null;
                 _archive.Flush();

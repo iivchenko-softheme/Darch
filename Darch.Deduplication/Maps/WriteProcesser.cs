@@ -6,6 +6,7 @@
 
 using System.IO;
 using Darch.Deduplication.Storages;
+using Shogun.Utility.Jobs;
 
 namespace Darch.Deduplication.Maps
 {
@@ -28,9 +29,9 @@ namespace Darch.Deduplication.Maps
         {
             WaitResume();
 
-            if (Status == MapStatus.Canceling)
+            if (Status == JobStatus.Canceling)
             {
-                Status = MapStatus.Canceled;
+                Status = JobStatus.Canceled;
                 return;
             }
 
@@ -43,9 +44,9 @@ namespace Darch.Deduplication.Maps
             {
                 WaitResume();
 
-                if (Status == MapStatus.Canceling)
+                if (Status == JobStatus.Canceling)
                 {
-                    Status = MapStatus.Canceled;
+                    Status = JobStatus.Canceled;
                     return;
                 }
 
@@ -54,7 +55,7 @@ namespace Darch.Deduplication.Maps
 
                 if (bytesRead == 0)
                 {
-                    Status = MapStatus.Succeeded;
+                    Status = JobStatus.Succeeded;
                     return;
                 }
 

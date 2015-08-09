@@ -4,12 +4,12 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-namespace Darch.Deduplication.Maps
+namespace Shogun.Utility.Jobs
 {
     /// <summary>
-    /// Set of data handling statuses.
+    /// Set of the <see cref="IJob"/> statuses.
     /// </summary>
-    public enum MapStatus
+    public enum JobStatus
     {
         Pending,
         InProgress,

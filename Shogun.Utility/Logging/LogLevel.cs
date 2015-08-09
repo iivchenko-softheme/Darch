@@ -4,7 +4,7 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-namespace Shogun.Patterns.Tests.Performance.Utility.Logging
+namespace Shogun.Utility.Logging
 {
     public enum LogLevel
     {

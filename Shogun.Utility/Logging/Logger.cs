@@ -7,14 +7,22 @@
 using System;
 using System.Text;
 
-namespace Shogun.Patterns.Tests.Performance.Utility.Logging
+namespace Shogun.Utility.Logging
 {
+    /// <summary>
+    /// Very simple logger that is using Console output.
+    /// </summary>
     public sealed class Logger
     {
         private readonly LogLevel _level;
         private readonly FlushPolicy _flushPolicy;
         private readonly StringBuilder _messages = new StringBuilder();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Logger"/> class.
+        /// </summary>
+        /// <param name="logLevel">Defines which types of messages to display and  which not.</param>
+        /// <param name="flushPolicy">Defines the way of displaying messages.</param>
         public Logger(LogLevel logLevel, FlushPolicy flushPolicy)
         {
             _level = logLevel;
@@ -43,9 +51,12 @@ namespace Shogun.Patterns.Tests.Performance.Utility.Logging
 
         public void Warning(string message)
         {
-            Log("ERROR: " + message, LogLevel.Warning);
+            Log("WARN: " + message, LogLevel.Warning);
         }
 
+        /// <summary>
+        /// If <c>flushPolicy</c> is set to <see cref="FlushPolicy.Buffered"/> all buffered messages will be displayed.
+        /// </summary>
         public void Flush()
         {
             if (_flushPolicy == FlushPolicy.Buffered)

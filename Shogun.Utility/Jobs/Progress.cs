@@ -4,7 +4,7 @@
 // <author>Ivan Ivchenko</author>
 // <email>iivchenko@live.com</email>
 
-namespace Darch.Deduplication.Maps
+namespace Shogun.Utility.Jobs
 {
     /// <summary>
     /// Displays data handling process.

@@ -6,18 +6,18 @@
 
 using System;
 
-namespace Darch.Deduplication.Maps
+namespace Shogun.Utility.Jobs
 {
     /// <summary>
-    /// Provides data for the event that is raised when data handling status changed.
+    /// Provides data for the event that is raised when the <see cref="IJob"/> JobStatus changed.
     /// </summary>
     public class StatusEventArgs : EventArgs
     {
-        public StatusEventArgs(MapStatus status)
+        public StatusEventArgs(JobStatus status)
         {
             Status = status;
         }
 
-        public MapStatus Status { get; private set; }
+        public JobStatus Status { get; private set; }
     }
 }

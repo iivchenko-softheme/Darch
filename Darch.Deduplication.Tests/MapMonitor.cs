@@ -6,13 +6,13 @@
 
 using System;
 using System.Diagnostics;
-using Darch.Deduplication.Maps;
+using Shogun.Utility.Jobs;
 
 namespace Darch.Deduplication.Tests
 {
     public sealed class MapMonitor : IDisposable
     {
-        private readonly IMapProcessor _map;
+        private readonly IJob _map;
         private readonly ulong _step;
         
         private readonly string _name;
@@ -20,12 +20,12 @@ namespace Darch.Deduplication.Tests
 
         private ulong _previousValue;
 
-        public MapMonitor(IMapProcessor map)
+        public MapMonitor(IJob map)
             : this(map, 20)
         {
         }
 
-        public MapMonitor(IMapProcessor map, ulong step)
+        public MapMonitor(IJob map, ulong step)
         {
             _map = map;
             _step = step;
@@ -55,19 +55,19 @@ namespace Darch.Deduplication.Tests
         {
             switch (args.Status)
             {
-                case MapStatus.InProgress:
+                case JobStatus.InProgress:
                     _stopwatch.Start();
                     Console.WriteLine("[{0}] [{1}] status changed to '{2}'", _map.Id, _name, args.Status);
                     break;
                 
-                case MapStatus.Canceled:
-                case MapStatus.Failed:
-                case MapStatus.Succeeded:
+                case JobStatus.Canceled:
+                case JobStatus.Failed:
+                case JobStatus.Succeeded:
                     _stopwatch.Stop();
                     Console.WriteLine("[{0}] [{1}] status changed to '{2}'. Process took: {3}", _map.Id, _name, args.Status, _stopwatch.Elapsed);
                     break;
 
-                case MapStatus.Paused:
+                case JobStatus.Paused:
                     _stopwatch.Stop();
                     break;
             }

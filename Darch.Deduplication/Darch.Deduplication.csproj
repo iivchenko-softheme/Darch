@@ -46,19 +46,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DeduplicationException.cs" />
+    <Compile Include="Storages\IMapProvider.cs" />
+    <Compile Include="Storages\MapProvider.cs" />
     <Compile Include="Utility\ByteArrayEquityComparer.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="Maps\BaseProcessor.cs" />
     <Compile Include="Maps\DeleteProcesser.cs" />
-    <Compile Include="Maps\IMapProcessor.cs" />
     <Compile Include="Maps\IMapProcessorFactory.cs" />
     <Compile Include="Maps\MapMissingException.cs" />
     <Compile Include="Maps\MapProcessorFactory.cs" />
-    <Compile Include="Maps\MapStatus.cs" />
-    <Compile Include="Maps\Progress.cs" />
-    <Compile Include="Maps\ProgressEventArgs.cs" />
     <Compile Include="Maps\ReadProcessor.cs" />
-    <Compile Include="Maps\StatusEventArgs.cs" />
     <Compile Include="Maps\WriteProcesser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository.cs" />

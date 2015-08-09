@@ -6,6 +6,7 @@
 
 using System.IO;
 using Darch.Deduplication.Storages;
+using Shogun.Utility.Jobs;
 
 namespace Darch.Deduplication.Maps
 {
@@ -18,17 +19,17 @@ namespace Darch.Deduplication.Maps
             _storage = storage;
         }
 
-        public IMapProcessor CreateReadProcessor(ulong mapId, Stream target)
+        public IJob CreateReadProcessor(ulong mapId, Stream target)
         {
             return new ReadProcessor(mapId, target, _storage);
         }
 
-        public IMapProcessor CreateWriteProcessor(ulong mapId, int blockSize, Stream source)
+        public IJob CreateWriteProcessor(ulong mapId, int blockSize, Stream source)
         {
             return new WriteProcessor(mapId, blockSize, source, _storage);
         }
 
-        public IMapProcessor CreateDeleteProcessor(ulong mapId)
+        public IJob CreateDeleteProcessor(ulong mapId)
         {
             return new DeleteProcessor(mapId, _storage);
         }

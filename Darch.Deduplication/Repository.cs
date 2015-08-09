@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Darch.Deduplication.Maps;
+using Shogun.Utility.Jobs;
 
 namespace Darch.Deduplication
 {
@@ -48,7 +49,7 @@ namespace Darch.Deduplication
             }
         }
 
-        public IMapProcessor Write(Stream source)
+        public IJob Write(Stream source)
         {
             lock (_lock)
             {
@@ -62,7 +63,7 @@ namespace Darch.Deduplication
             }
         }
 
-        public IMapProcessor Read(ulong mapId, Stream target)
+        public IJob Read(ulong mapId, Stream target)
         {
             lock (_lock)
             {
@@ -73,7 +74,7 @@ namespace Darch.Deduplication
             }
         }
 
-        public IMapProcessor Delete(ulong mapId)
+        public IJob Delete(ulong mapId)
         {
             lock (_lock)
             {
@@ -85,14 +86,14 @@ namespace Darch.Deduplication
                 
                 statusAction = (sender, args) =>
                                {
-                                   if (args.Status == MapStatus.Succeeded)
+                                   if (args.Status == JobStatus.Succeeded)
                                    {
                                        _mapIdsCahce.Remove(mapId);
                                    }
 
-                                   if (args.Status == MapStatus.Canceled || 
-                                       args.Status == MapStatus.Failed ||
-                                       args.Status == MapStatus.Succeeded)
+                                   if (args.Status == JobStatus.Canceled || 
+                                       args.Status == JobStatus.Failed ||
+                                       args.Status == JobStatus.Succeeded)
                                    {
                                        map.StatusChanged -= statusAction;
                                    }

@@ -17,8 +17,8 @@ namespace Darch.Deduplication.Storages
 
         void AddBlockItem(ulong mapId, byte[] block, int realSize);
 
-        byte[] ReadBlockItem(ulong mapId, ulong blockIndex);
+        byte[] ReadBlockItem(ulong mapId, ulong id);
 
-        void DeleteBlockItem(ulong mapId, ulong blockIndex);
+        void DeleteBlockItem(ulong mapId, ulong id);
     }
 }

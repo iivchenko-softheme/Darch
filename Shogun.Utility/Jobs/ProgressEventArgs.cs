@@ -6,10 +6,10 @@
 
 using System;
 
-namespace Darch.Deduplication.Maps
+namespace Shogun.Utility.Jobs
 {
     /// <summary>
-    /// Provides data for the event that is raised when data handling progress changed.
+    /// Provides data for the event that is raised when the <see cref="IJob"/> progress changed.
     /// </summary>
     public class ProgressEventArgs : EventArgs
     {

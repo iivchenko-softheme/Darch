@@ -11,7 +11,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Darch.Deduplication.Tests.Data;
 using Darch.Deduplication.Tests.Repository;
-using Darch.Deduplication.Utility;
 using NUnit.Framework;
 using FileInfo = Darch.Deduplication.Tests.Data.FileInfo;
 
@@ -24,9 +23,10 @@ namespace Darch.Deduplication.Tests
         private const int BlockSize = 8 * 1024;
         private const int ChecksumSize = Md5ChecksumSize;
 
-        private const int SourceStreamSize = 100 * 1024 * 1024;
+        private const int SourceStreamSize = 512 * 1024 * 1024;
 
         private int _seed;
+        private string _workDir;
 
         [TestFixtureSetUp]
         public void Initialize()
@@ -36,6 +36,30 @@ namespace Darch.Deduplication.Tests
             Console.WriteLine("Seed: {0}", _seed);
         }
 
+        [SetUp]
+        public void Setup()
+        {
+            _workDir = Path.Combine(Path.GetTempPath(), "Performance_Test\\");
+
+            if (Directory.Exists(_workDir))
+            {
+                Directory.Delete(_workDir, true);
+            }
+
+            Directory.CreateDirectory(_workDir);
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            _workDir = Path.Combine(Path.GetTempPath(), "Performance_Test\\");
+
+            if (Directory.Exists(_workDir))
+            {
+                Directory.Delete(_workDir, true);
+            }
+        }
+
         [Test]
         public void WriteRead_Test()
         {
@@ -43,7 +67,7 @@ namespace Darch.Deduplication.Tests
             var sourceStream = dataGenerator.GenerateData(SourceStreamSize);
             var targetStream = new MemoryStream();
 
-            using (var repo = new ManagedRepository(BlockSize, ChecksumSize))
+            using (var repo = new ManagedRepository(BlockSize, ChecksumSize, _workDir))
             {
                 using (var map = repo.Write(sourceStream))
                 using (new MapMonitor(map))
@@ -72,7 +96,7 @@ namespace Darch.Deduplication.Tests
             var dataGenerator = new DataManager(_seed);
             var sourceStream = dataGenerator.GenerateData(10);
 
-            using (var repo = new ManagedRepository(BlockSize, ChecksumSize))
+            using (var repo = new ManagedRepository(BlockSize, ChecksumSize, _workDir))
             {
                 for (var i = 0; i < 3; i++)
                 {
@@ -112,8 +136,8 @@ namespace Darch.Deduplication.Tests
             // Generate test data
             var dataGenerator = new DataManager(_seed);
             var sourceStream = dataGenerator.GenerateData(SourceStreamSize);
-
-            using (var repo = new ManagedRepository(BlockSize, ChecksumSize))
+            
+            using (var repo = new ManagedRepository(BlockSize, ChecksumSize, _workDir))
             { 
                 sourceStream.Seek(0, SeekOrigin.Begin);
                 using (var map = repo.Write(sourceStream))
@@ -152,22 +176,9 @@ namespace Darch.Deduplication.Tests
         public void Performance_Test()
         {
             const int FilesCount = 1;
-            const int FileSize = 100 * 1024 * 1024;
+            const int FileSize = 512 * 1024 * 1024;
 
-            var workDir = Path.Combine(Path.GetTempPath(), "Performance_Test\\");
-
-            if (Directory.Exists(workDir))
-            {
-                Directory.Delete(workDir, true);
-            }
-
-            Directory.CreateDirectory(workDir);
-
-            Func<string> getFilePath = () => Path.Combine(workDir, Path.GetRandomFileName());
-
-            var mapFilePath = Path.Combine(workDir, "map.dat");
-            var metadataFilePath = Path.Combine(workDir, "metadata.dat");
-            var dataFilePath = Path.Combine(workDir, "data.dat");
+            Func<string> getFilePath = () => Path.Combine(_workDir, Path.GetRandomFileName());
 
             var sourceFiles = new List<FileInfo>(FilesCount);
             var targetFiles = new List<FileInfo>(FilesCount);
@@ -209,7 +220,7 @@ namespace Darch.Deduplication.Tests
                                                                  targetFiles.Add(targetFile);
                                                              };
 
-            using (var repo = new ManagedRepository(BlockSize, ChecksumSize, File.Create(mapFilePath), File.Create(metadataFilePath), File.Create(dataFilePath)))
+            using (var repo = new ManagedRepository(BlockSize, ChecksumSize, _workDir))
             {
                 Console.WriteLine("=== Generating files (count: {0}) ===", FilesCount);
                 Parallel.For(0, FilesCount, i => sourceFiles.Add(dataManager.GenerateFile(FileSize)));
@@ -229,18 +240,7 @@ namespace Darch.Deduplication.Tests
 
                     Assert.AreEqual(source.Hash, target.Hash);
                 }
-
-                Console.WriteLine("Map File: {0} => {1}", mapFilePath, repo.MapStream.Length.ToDigitalInfoUnit());
-                Console.WriteLine("Metadata File: {0} => {1}", metadataFilePath, repo.MetadataStream.Length.ToDigitalInfoUnit());
-                Console.WriteLine("Data File: {0} => {1}", dataFilePath, repo.DataStream.Length.ToDigitalInfoUnit());
-                Console.WriteLine();
-
-                Console.WriteLine("Total source files size on the disk: {0}", sourceFiles.Select(x => x.Size).Aggregate(0, (i, i1) => i + i1).ToDigitalInfoUnit());
-                Console.WriteLine("Total size of the repository files: {0}", ((int)(repo.DataStream.Length + repo.MetadataStream.Length + repo.MapStream.Length)).ToDigitalInfoUnit());
             }
-
-            // Clear Section
-            Directory.Delete(workDir, true);
         }
     }
 }

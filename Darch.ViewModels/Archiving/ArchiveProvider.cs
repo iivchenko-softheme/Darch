@@ -33,11 +33,11 @@ namespace Darch.ViewModels.Archiving
         {
             var package = Package.Open(path, FileMode.Open);
             var metadata = package.GetPart(new Uri("/Metadata.xml", UriKind.Relative)).GetStream();
-            var mapRepository = OpenRepository(package, "/Map.dat", new MapStreamMapper(), MapStreamMapper.BufferSize);
+            var mapProvider = new MapProvider(package);
             var metadataStreamMapper = new MetadataStreamMapper(ChecksumSize);
             var metadataRepository = OpenRepository(package, "/Metadata.dat", metadataStreamMapper, metadataStreamMapper.BufferSize);
             var dataRepository = OpenRepository(package, "/Data.dat", new DataStreamMapper(BlockSize), BlockSize);
-            var storage = new Storage(_hash, mapRepository, metadataRepository, dataRepository);
+            var storage = new Storage(_hash, mapProvider, metadataRepository, dataRepository);
             var mapProcessor = new MapProcessorFactory(storage);
             var repository = new Repository(mapProcessor, storage.MapIds.ToList(), BlockSize);
             
@@ -48,11 +48,11 @@ namespace Darch.ViewModels.Archiving
         {
             var package = Package.Open(path, FileMode.Create);
             var metadata = package.CreatePart(new Uri("/Metadata.xml", UriKind.Relative), System.Net.Mime.MediaTypeNames.Text.Xml).GetStream();
-            var mapRepository = CreateRepository(package, "/Map.dat", new MapStreamMapper(), MapStreamMapper.BufferSize);
+            var mapProvider = new MapProvider(package);
             var metadataStreamMapper = new MetadataStreamMapper(ChecksumSize);
             var metadataRepository = CreateRepository(package, "/Metadata.dat", metadataStreamMapper, metadataStreamMapper.BufferSize);
             var dataRepository = CreateRepository(package, "/Data.dat", new DataStreamMapper(BlockSize), BlockSize);
-            var storage = new Storage(_hash, mapRepository, metadataRepository, dataRepository);
+            var storage = new Storage(_hash, mapProvider, metadataRepository, dataRepository);
             var mapProcessor = new MapProcessorFactory(storage);
             var repository = new Repository(mapProcessor, storage.MapIds.ToList(), BlockSize);
 

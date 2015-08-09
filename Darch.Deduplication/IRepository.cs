@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Darch.Deduplication.Maps;
+using Shogun.Utility.Jobs;
 
 namespace Darch.Deduplication
 {
@@ -26,7 +27,7 @@ namespace Darch.Deduplication
         /// </summary>
         /// <param name="source">Data stream which will be used as a source of data to write to the repository. All data from the stream will be written to the repository.</param>
         /// <returns>Data writing monitor.</returns>
-        IMapProcessor Write(Stream source);
+        IJob Write(Stream source);
 
         /// <summary>
         /// Find map by id and creates map reader monitor.
@@ -34,13 +35,13 @@ namespace Darch.Deduplication
         /// <param name="mapId">Identifier of the registered map in the repository.</param>
         /// <param name="target">Target data stream which where data from the map will writer. Stream will be reinitialized: cleared and writing will began from the very beginning.</param>
         /// <returns>Data reading monitor.</returns>
-        IMapProcessor Read(ulong mapId, Stream target);
+        IJob Read(ulong mapId, Stream target);
 
         /// <summary>
         /// Find map by id and creates map deleting monitor. After deleting the map will be deregistered.
         /// </summary>
         /// <param name="mapId">Identifier of the registered map in the repository.</param>
         /// <returns>Data deleting monitor.</returns>
-        IMapProcessor Delete(ulong mapId);
+        IJob Delete(ulong mapId);
     }
 }
