@@ -58,7 +58,7 @@ namespace Darch.GUI.Wpf.Views
 
         private void About_OnClick(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Darch v 0.1\nDeduplication Archive\nDeveloped by Shogun\nE-mail: iivchenko@live.com");
+            MessageBox.Show("Darch v 0.1.1\nDeduplication Archive\nDeveloped by Shogun\nE-mail: iivchenko@live.com");
         }
 
         private void Add_OnClick(object sender, RoutedEventArgs e)
